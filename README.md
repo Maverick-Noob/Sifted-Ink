@@ -187,6 +187,8 @@ api_provider: "anthropic"            # 提供商: anthropic / openai / google / 
 ## 🖥️ Web 界面预览 | Web UI
 
 启动后访问 `http://localhost:8000`：
+<img width="2559" height="1316" alt="屏幕截图 2026-06-11 190544" src="https://github.com/user-attachments/assets/4f008e81-d3d6-457c-b79a-ec8dc69f30de" />
+<img width="2538" height="1300" alt="屏幕截图 2026-06-11 191004" src="https://github.com/user-attachments/assets/a465e02d-df96-4bb5-b09b-1918952825d9" />
 
 | 页面 | 路径 | 功能 |
 |---|---|---|
