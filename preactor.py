@@ -68,8 +68,16 @@ async def run_version(
         f"{' (超时=' + str(timeout_seconds) + 's)' if timeout_seconds != config.version_timeout_seconds else ''}"
     )
 
+    # Adapt chapter cap for small word targets
+    effective_max_chapters = _adaptive_max_chapters(config)
+    if effective_max_chapters != config.max_chapters:
+        logger.info(
+            f"[版本 {version_id}] 目标字数 {config.target_word_count}，"
+            f"章节上限调整为 {effective_max_chapters}（原 {config.max_chapters}）"
+        )
+
     constraints = VersionConstraints(
-        max_chapters=config.max_chapters,
+        max_chapters=effective_max_chapters,
         max_npcs=config.max_npcs,
         max_tokens_per_call=config.max_tokens_per_call,
         repeat_threshold=config.repeat_similarity_threshold,
@@ -360,6 +368,7 @@ async def run_version(
                 protagonist_action=protagonist_action,
                 npc_actions=npc_actions,
                 director_notes=chapter_summary,
+                chapter_title=director_decision.get("chapter_title", ""),
                 npcs_introduced=[
                     NPC(
                         name=d.get("name", ""),
@@ -513,7 +522,7 @@ def _calc_word_target(config: StoryConfig, state: StoryState) -> int:
       - Target total word count
       - Words written so far
       - Estimated chapters remaining (from outline or max_chapters)
-    Returns a suggested word count for the next chapter (300~1500 range).
+    Returns a suggested word count for the next chapter.
     """
     target_total = config.target_word_count
     written = state.total_words
@@ -532,14 +541,40 @@ def _calc_word_target(config: StoryConfig, state: StoryState) -> int:
     # Dynamic target: distribute remaining words evenly
     per_chapter = words_remaining // chapters_left
 
-    # Floor at 300, ceiling at 1500 (Chinese chars per chapter)
-    per_chapter = max(300, min(1500, per_chapter))
+    # Adaptive floor/ceiling based on target size
+    if target_total <= 3000:
+        floor, ceiling = 100, 800
+    elif target_total <= 5000:
+        floor, ceiling = 150, 1000
+    elif target_total <= 10000:
+        floor, ceiling = 200, 1200
+    else:
+        floor, ceiling = 300, 1500
 
-    # If the story is almost done (last 3 chapters), tighten the range
+    per_chapter = max(floor, min(ceiling, per_chapter))
+
+    # If the story is almost done (last 3 chapters), tighten
     if chapters_left <= 3 and words_remaining > 0:
-        per_chapter = max(200, words_remaining // chapters_left)
+        per_chapter = max(floor // 2, words_remaining // chapters_left)
 
     return per_chapter
+
+
+def _adaptive_max_chapters(config: StoryConfig) -> int:
+    """
+    Dynamically reduce max_chapters for small target word counts.
+    Prevents generating 30 chapters when user only wants 2000 words.
+    """
+    target = config.target_word_count
+    if target <= 1000:
+        return min(config.max_chapters, 5)
+    elif target <= 3000:
+        return min(config.max_chapters, 10)
+    elif target <= 5000:
+        return min(config.max_chapters, 15)
+    elif target <= 10000:
+        return min(config.max_chapters, 20)
+    return config.max_chapters
 
 
 def _remove_npc(state: StoryState, npc_name: str):

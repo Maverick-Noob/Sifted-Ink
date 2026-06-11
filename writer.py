@@ -5,6 +5,7 @@ a complete novel (Markdown), and generates eval_log.json.
 
 import json
 import os
+import re
 from datetime import datetime
 
 from .models import StoryConfig, StoryState, PreActorResult
@@ -38,11 +39,9 @@ async def generate_front_matter(
 
     # 1. Epigraph (引言)
     if "epigraph" in selected:
-        tags = " · ".join([story_name, config.protagonist_name])
         parts.append(
-            f"> *\"{story_name}\"*\n>\n"
-            f"> *千墨选一，落纸成书*\n>\n"
-            f"> — {tags}\n"
+            f'\n\n> *{story_name}*\n>\n'
+            f'> *千墨选一，落纸成书*\n\n'
         )
 
     # 2. TOC (目录) — auto-generated
@@ -65,37 +64,47 @@ async def generate_front_matter(
                 f"摘要: {novel_text[:600]}"
             )
             text, _ = await llm_client.call(
-                prompt, "请写一段楔子。", temperature=0.8, max_tokens=800,
+                prompt, "请写一段楔子，不要包含'楔子'标题。", temperature=0.8, max_tokens=800,
             )
-            parts.append(f"# 楔子\n\n{text.strip()}")
+            text = text.strip()
+            # Remove duplicate heading if LLM still includes it
+            text = re.sub(r'^#+\s*楔子\s*\n*', '', text)
+            parts.append(f"# 楔子\n\n{text}")
         except Exception as e:
             logger.warning(f"楔子生成失败: {e}")
 
     # 4. Characters (人物表) — extracted from story
-    if "characters" in selected and npx_engine:
-        try:
-            from .naming import extract_keywords
-            kw = extract_keywords(config, novel_text)
-            char_lines = ["# 人物表\n", f"| 角色 | 描述 |", "|------|------|"]
-            # Protagonist always first
-            char_lines.append(
-                f"| {config.protagonist_name} | "
-                f"{config.protagonist_traits[:60]}... |"
-            )
-            # Others from keywords
-            for loc in kw.locations[:3]:
-                char_lines.append(f"| {loc}的居民 | 来自{loc} |")
-            parts.append("\n".join(char_lines))
-        except Exception as e:
-            logger.warning(f"人物表生成失败: {e}")
+    if "characters" in selected:
+        char_lines = ["# 人物表\n", "| 角色 | 描述 |", "|------|------|"]
+        char_lines.append(
+            f"| {config.protagonist_name}（主角） | "
+            f"{config.protagonist_traits[:80]} |"
+        )
+        # Add user-defined NPCs
+        for npc in (config.user_npcs or []):
+            desc = npc.personality or npc.backstory or npc.role or ""
+            char_lines.append(f"| {npc.name} | {desc[:60]} |")
+        # Extract actual character names from chapter titles/director notes
+# Match Chinese names: 2-3 character sequences that appear before verbs
+        names = set()
+        for line in novel_text.split("\n"):
+            if line.startswith("## "):
+                names_in_title = re.findall(r'[一-鿿]{2,3}(?=和|与|及|、)', line)
+                names.update(names_in_title)
+        for name in sorted(names)[:6]:
+            if name != config.protagonist_name:
+                char_lines.append(f"| {name} | 故事角色 |")
+        if len(char_lines) <= 3:  # Only header + protagonist = no other characters found
+            char_lines.append("| 其他角色 | 随故事发展登场 |")
+        parts.append("\n".join(char_lines))
 
     if not parts:
         return ""
 
-    return "\n\n---\n\n".join(parts) + "\n\n---\n\n"
+    return "\n\n---\n\n".join(parts) + "\n\n"
 
 
-def generate_novel(result: PreActorResult) -> str:
+def generate_novel(result: PreActorResult, story_name: str = "") -> str:
     """
     Generate the final novel as Markdown text from the winning version.
 
@@ -109,25 +118,18 @@ def generate_novel(result: PreActorResult) -> str:
     lines = []
 
     # Title page
-    lines.append(f"# {config.protagonist_name}的传奇")
-    lines.append("")
-    lines.append(f"> 由 选墨集（Sifted-Ink）自动生成")
-    lines.append(f"> 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    lines.append(f"> 模型: {config.model}")
-    lines.append(f"> 总章节: {winning_version.chapter_count}")
-    lines.append(f"> 总字数: 约{winning_version.total_words}字")
+    title = story_name or f"{config.protagonist_name}的传奇"
+    lines.append(f"# {title}")
     lines.append("")
     lines.append("---")
     lines.append("")
 
     # Assemble chapters
-    naming_style = result.config.naming_style
-    protagonist = result.config.protagonist_name
     for ch in winning_version.chapters:
-        title = naming_chapter_title(
-            ch.director_notes or ch.content[:200], ch.number,
-            naming_style, protagonist,
-        )
+        if ch.chapter_title and 2 <= len(ch.chapter_title) <= 25:
+            title = f"第{ch.number}章 {ch.chapter_title}"
+        else:
+            title = f"第{ch.number}章"
         lines.append(f"## {title}")
         lines.append("")
         lines.append(ch.content.strip())
@@ -149,25 +151,16 @@ def generate_novel_for_version(result: PreActorResult, version: StoryState) -> s
     """Generate novel text for a specific version (not necessarily the winner)."""
     config = result.config
     lines = []
-    lines.append(f"# {config.protagonist_name}的传奇")
-    lines.append("")
-    lines.append(f"> 由 选墨集（Sifted-Ink）自动生成")
-    lines.append(f"> 版本: #{version.version_id}")
-    lines.append(f"> 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    lines.append(f"> 模型: {config.model}")
-    lines.append(f"> 总章节: {version.chapter_count}")
-    lines.append(f"> 总字数: 约{version.total_words}字")
+    lines.append(f"# {config.protagonist_name}的传奇 · 版本#{version.version_id}")
     lines.append("")
     lines.append("---")
     lines.append("")
 
-    naming_style = result.config.naming_style
-    protagonist = result.config.protagonist_name
     for ch in version.chapters:
-        title = naming_chapter_title(
-            ch.director_notes or ch.content[:200], ch.number,
-            naming_style, protagonist,
-        )
+        if ch.chapter_title and 2 <= len(ch.chapter_title) <= 25:
+            title = f"第{ch.number}章 {ch.chapter_title}"
+        else:
+            title = f"第{ch.number}章"
         lines.append(f"## {title}")
         lines.append("")
         lines.append(ch.content.strip())

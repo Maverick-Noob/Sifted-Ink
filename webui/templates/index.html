@@ -27,9 +27,8 @@
                     <div class="proto-row" style="padding:0.5rem 0;border-bottom:1px solid var(--border);">
                         <div class="form-group"><label>姓名</label><input type="text" name="protagonist_name_0" value="林远" required></div>
                         <div class="form-group"><label>性格、动机、能力</label><textarea name="protagonist_traits_0" rows="2" required>勇敢但冲动，今年20岁，渴望为家族复仇。擅长剑术，具备初级火系魔法能力。</textarea></div>
-                        <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;gap:0.5rem;">
-                            <input type="text" name="protagonist_role_0" placeholder="团队角色（如：队长、智囊、战士）">
-                            <input type="text" name="protagonist_abilities_0" placeholder="能力/技能">
+                        <div class="form-row" style="grid-template-columns:1fr 1fr;gap:0.5rem;">
+                            <input type="text" name="protagonist_role_0" placeholder="团队角色（队长/智囊/战士）">
                             <input type="number" name="protagonist_intro_0" placeholder="登场章（0=AI决定）" value="0" min="0">
                         </div>
                     </div>
@@ -156,11 +155,12 @@
                     <h3>前附文 <span style="font-weight:400;font-size:0.8rem;color:var(--text-muted);">（可选）</span></h3>
                 </div>
                 <div style="display:flex;gap:1rem;flex-wrap:wrap;">
-                    <label style="cursor:pointer;font-size:0.85rem;color:var(--text-secondary);"><input type="checkbox" name="front_matter" value="toc"> 目录</label>
-                    <label style="cursor:pointer;font-size:0.85rem;color:var(--text-secondary);"><input type="checkbox" name="front_matter" value="epigraph"> 引言</label>
-                    <label style="cursor:pointer;font-size:0.85rem;color:var(--text-secondary);"><input type="checkbox" name="front_matter" value="prologue"> 楔子</label>
-                    <label style="cursor:pointer;font-size:0.85rem;color:var(--text-secondary);"><input type="checkbox" name="front_matter" value="characters"> 人物表</label>
+                    <label style="cursor:pointer;font-size:0.85rem;color:var(--text-secondary);"><input type="checkbox" class="fm-check" value="toc" onchange="updateFrontMatter()"> 目录</label>
+                    <label style="cursor:pointer;font-size:0.85rem;color:var(--text-secondary);"><input type="checkbox" class="fm-check" value="epigraph" onchange="updateFrontMatter()"> 引言</label>
+                    <label style="cursor:pointer;font-size:0.85rem;color:var(--text-secondary);"><input type="checkbox" class="fm-check" value="prologue" onchange="updateFrontMatter()"> 楔子</label>
+                    <label style="cursor:pointer;font-size:0.85rem;color:var(--text-secondary);"><input type="checkbox" class="fm-check" value="characters" onchange="updateFrontMatter()"> 人物表</label>
                 </div>
+                <input type="hidden" name="front_matter_csv" id="front-matter-csv" value="">
             </div>
 
             <!-- ── API 设置 ── -->
@@ -385,6 +385,12 @@
 
     loadStyles();
 
+    // ── Front matter checkbox sync ─────────────────────────────────
+    function updateFrontMatter() {
+        const checked = Array.from(document.querySelectorAll('.fm-check:checked')).map(cb => cb.value);
+        document.getElementById('front-matter-csv').value = checked.join(',');
+    }
+
     // ── Multi-protagonist dynamic form ─────────────────────────────
     let protoCounter = 1;
     function updateProtagonistCount() {
@@ -402,9 +408,8 @@
             </div>
             <div class="form-group"><label>姓名</label><input type="text" name="protagonist_name_${id}" placeholder="主角姓名"></div>
             <div class="form-group"><label>性格、动机、能力</label><textarea name="protagonist_traits_${id}" rows="2" placeholder="性格描述、动机、初始能力"></textarea></div>
-            <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;gap:0.3rem;">
+            <div class="form-row" style="grid-template-columns:1fr 1fr;gap:0.3rem;">
                 <div class="form-group"><input type="text" name="protagonist_role_${id}" placeholder="团队角色"></div>
-                <div class="form-group"><input type="text" name="protagonist_abilities_${id}" placeholder="能力/技能"></div>
                 <div class="form-group"><input type="number" name="protagonist_intro_${id}" placeholder="登场章" value="0" min="0"></div>
             </div>
         </div>`;
