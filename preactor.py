@@ -24,6 +24,7 @@ from .constraints import (
     TimeoutTracker,
 )
 from .utils import logger, moderate_content
+from .story_memory import StoryMemoryStore, extract_chapter_memory
 
 
 # =========================================================================
@@ -77,6 +78,7 @@ async def run_version(
         threshold=config.repeat_similarity_threshold, window=3
     )
     timeout = TimeoutTracker(timeout_seconds)
+    memory_store = StoryMemoryStore()  # RAG story memory for chapter coherence
 
     logger.info(f"[版本 {version_id}] 预演开始")
 
@@ -244,6 +246,7 @@ async def run_version(
                         role=npc_data.get("role", "路人"),
                         personality=npc_data.get("personality", "普通"),
                         goal=npc_data.get("goal", "暂无明确目标"),
+                        backstory=npc_data.get("backstory", ""),
                         intro_chapter=state.chapter_count + 1,
                         last_active_chapter=state.chapter_count + 1,
                         relevance=npc_data.get("relevance", "medium"),
@@ -337,9 +340,16 @@ async def run_version(
                 f"[版本 {version_id}] 生成第 {state.chapter_count + 1} 章 "
                 f"(目标 {word_target} 字, 已写 {state.total_words} / {config.target_word_count})"
             )
+            # Build RAG context for the Writer
+            active_npc_names = [n.name for n in state.active_npcs if n.alive and n.active]
+            rag_context = memory_store.build_context(
+                state.chapter_count + 1, active_npc_names,
+            )
+
             narrative_text, write_tokens = await writer.write_chapter(
                 state, director_decision, protagonist_action, npc_actions,
                 word_target=word_target,
+                rag_context=rag_context,
             )
             state.total_tokens_used += write_tokens
 
@@ -364,6 +374,15 @@ async def run_version(
                 token_cost=write_tokens,
             )
             state.chapters.append(chapter)
+
+            # Extract RAG memory from this chapter for future coherence
+            try:
+                mem = await extract_chapter_memory(
+                    narrative_text, chapter.number, client,
+                )
+                memory_store.add(mem)
+            except Exception:
+                pass  # memory extraction should never block generation
 
             # Content moderation check
             mod_result = moderate_content(narrative_text)

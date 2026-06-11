@@ -123,6 +123,7 @@ class NPC:
     exit_chapter: Optional[int] = None
     last_active_chapter: int = 0  # last chapter where this NPC performed an action
     relevance: str = "medium"    # high / medium / low — how important to the main plot
+    backstory: str = ""          # character background (1-2 sentences)
 
 
 @dataclass
