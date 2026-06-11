@@ -721,7 +721,9 @@ class DirectorAgent:
         """Build the user message describing current story state."""
         prev_chapters = ""
         for ch in state.chapters[-3:]:
-            prev_chapters += f"第{ch.number}章: {ch.director_notes or ch.content[:200]}\n"
+            # Show chapter ENDING (last 200 chars) so Director knows where story left off
+            ending = ch.content[-200:] if ch.content else ""
+            prev_chapters += f"第{ch.number}章结尾: {ending}\n"
 
         # Separate user-defined NPCs for special highlighting
         user_npc_names = {unp.name.strip() for unp in self.config.user_npcs if unp.name.strip()}
@@ -1008,6 +1010,23 @@ class EvaluatorAgent:
 # Narrative Writer Agent — generates actual chapter narrative text
 # =========================================================================
 
+def _build_npc_profiles(state) -> str:
+    """Build a summary of active NPC profiles for the NarrativeWriter."""
+    active = [n for n in state.active_npcs if n.alive and n.active]
+    if not active:
+        return "无"
+    lines = []
+    for n in active[:6]:  # max 6 for token efficiency
+        is_new = n.intro_chapter == state.chapter_count + 1
+        tag = " [首次出场]" if is_new else ""
+        backstory = getattr(n, 'backstory', '') or ''
+        lines.append(
+            f"- {n.name}（{n.role}）性格:{n.personality} 目标:{n.goal}"
+            f"{' 背景:' + backstory if backstory else ''}{tag}"
+        )
+    return "\n".join(lines)
+
+
 class NarrativeWriter:
     """
     Generates the actual narrative prose for a chapter based on agent actions.
@@ -1023,6 +1042,8 @@ class NarrativeWriter:
 3. 包含适当的场景描写、动作描写、对话和心理活动。
 4. 字数控制在 500-800 字。
 5. 保持与前文章节风格一致。
+6. **场景连续性**：章节开头必须交代角色的当前位置。如果场景与上章结尾不同，用一两句话描述角色是如何到达新场景的（旅行、时间流逝、突发事件等）。禁止角色位置突然跳跃。
+7. **角色引入**：如果本章有首次出场的新角色，通过动作或简短描写自然交代其身份特征，避免毫无铺垫地突然出现。
 
 ## 输出格式
 直接输出叙事文字，不需要 JSON 格式。不要添加"第X章"标题（标题由程序添加）。"""
@@ -1047,11 +1068,17 @@ class NarrativeWriter:
         protagonist_action: AgentAction,
         npc_actions: list[AgentAction],
         word_target: int = 650,
+        rag_context: str = "",
     ) -> tuple[str, int]:
-        """Generate the narrative text for a chapter with a dynamic word target."""
-        prev_text = ""
-        for ch in state.chapters[-2:]:
-            prev_text += ch.content[-300:] + "\n"
+        """Generate the narrative text for a chapter with dynamic word target and RAG context."""
+        # Use RAG context when available, fall back to raw text
+        if rag_context:
+            prev_context = rag_context
+        else:
+            prev_text = ""
+            for ch in state.chapters[-2:]:
+                prev_text += ch.content[-500:] + "\n"
+            prev_context = f"## 前文章节结尾\n{prev_text or '（故事开始）'}"
 
         chapter_num = state.chapter_count + 1
 
@@ -1063,8 +1090,7 @@ class NarrativeWriter:
         if self._style_instruction:
             style_note = f"\n## 风格参考\n本章请模仿 **{self.config.writing_style}** 的风格写作。\n"
 
-        user = f"""## 前文章节结尾
-{prev_text or "（故事开始）"}
+        user = f"""{prev_context}
 
 ## 本章导演指示
 {json.dumps(director_decision, ensure_ascii=False, indent=2)}
@@ -1077,6 +1103,9 @@ class NarrativeWriter:
 {style_note}
 ## NPC 行动
 {npc_text or "本章无 NPC 参与行动"}
+
+## 活跃 NPC 角色档案
+{_build_npc_profiles(state)}
 
 ## 写作要求
 - 这是第 {chapter_num} 章

@@ -323,29 +323,35 @@ CHAPTER_TITLE_TEMPLATES = {
 
 
 def generate_chapter_title(
-    chapter_summary: str, chapter_num: int, style_name: str = ""
+    chapter_summary: str, chapter_num: int, style_name: str = "",
+    protagonist_name: str = "",
 ) -> str:
     """
     Generate a creative chapter title using naming style templates.
-    Falls back to '第N章' if style unavailable.
+    Defaults to '直白陈述型' when style is empty.
     """
+    style_name = style_name or "直白陈述型"
     templates = CHAPTER_TITLE_TEMPLATES.get(style_name)
     if not templates:
-        return f"第{chapter_num}章"
+        templates = CHAPTER_TITLE_TEMPLATES.get("直白陈述型", [])
+        if not templates:
+            return f"第{chapter_num}章"
 
     # Extract mini-keywords from chapter summary
     kw = {}
     # Location
-    loc_match = re.search(r'[\w一-鿿]{1,4}(?:谷|城|国|殿|林|山|海|镇|村|堡|岛)', chapter_summary)
+    loc_match = re.search(r'[一-鿿]{1,4}(?:谷|城|国|殿|林|山|海|镇|村|堡|岛)', chapter_summary)
     kw['location'] = loc_match.group(0) if loc_match else "此地"
-    # Character
-    char_match = re.search(r'(?:林远|艾琳|莫里斯|铁山|[\w一-鿿]{2,3})(?=目睹|来到|决定|发现|说|冲|拔|感到)', chapter_summary)
-    kw['character'] = char_match.group(0) if char_match else "他"
+    # Character — dynamic from protagonist name
+    proto_name = protagonist_name or "主角"
+    char_pattern = re.escape(proto_name) + r'|[一-鿿]{2,3}'
+    char_match = re.search(rf'(?:{char_pattern})(?=目睹|来到|决定|发现|说|冲|拔|感到|走向|站在|面对)', chapter_summary)
+    kw['character'] = char_match.group(0) if char_match else proto_name
     # Event
-    event_match = re.search(r'(?:发现|击败|获得|失去|觉醒|封印|揭开|打破|穿越|逃离|对质|告白)[\w一-鿿]{0,6}', chapter_summary)
+    event_match = re.search(r'(?:发现|击败|获得|失去|觉醒|封印|揭开|打破|穿越|逃离|对质|告白)[一-鿿]{0,6}', chapter_summary)
     kw['event'] = event_match.group(0) if event_match else "抉择"
     # Item
-    item_match = re.search(r'[《「]([\w一-鿿]{1,6})[》」]', chapter_summary)
+    item_match = re.search(r'[《「]([一-鿿]{1,6})[》」]', chapter_summary)
     kw['item'] = item_match.group(1) if item_match else "信物"
 
     # Pick random template and generate

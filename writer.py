@@ -122,9 +122,11 @@ def generate_novel(result: PreActorResult) -> str:
 
     # Assemble chapters
     naming_style = result.config.naming_style
+    protagonist = result.config.protagonist_name
     for ch in winning_version.chapters:
         title = naming_chapter_title(
-            ch.director_notes or ch.content[:200], ch.number, naming_style,
+            ch.director_notes or ch.content[:200], ch.number,
+            naming_style, protagonist,
         )
         lines.append(f"## {title}")
         lines.append("")
@@ -159,8 +161,13 @@ def generate_novel_for_version(result: PreActorResult, version: StoryState) -> s
     lines.append("---")
     lines.append("")
 
+    naming_style = result.config.naming_style
+    protagonist = result.config.protagonist_name
     for ch in version.chapters:
-        title = _generate_chapter_title(ch)
+        title = naming_chapter_title(
+            ch.director_notes or ch.content[:200], ch.number,
+            naming_style, protagonist,
+        )
         lines.append(f"## {title}")
         lines.append("")
         lines.append(ch.content.strip())
