@@ -1,0 +1,54 @@
+# ============================================================
+# 选墨集 / Sifted-Ink — 多 Agent 预演故事生成器 — 示例配置
+# ============================================================
+
+# --- 主角信息 ---
+protagonist_name: "林远"
+protagonist_traits: |
+  勇敢但冲动，今年20岁，渴望为家族复仇。
+  擅长剑术，具备初级火系魔法能力。
+  性格：重情重义，但有时过于相信他人，容易受骗。
+  动机：找到父亲留下的神器"炎之心"，击败毁灭家族的幕后黑手。
+
+# --- 世界背景 ---
+world_setting: |
+  架空奇幻世界"苍澜大陆"，中世纪文明水平。
+  存在完善的四元素魔法体系（火、水、风、土）。
+  人类与精灵、矮人三族共存，关系微妙。
+  魔法公会与武者行会两大势力互相制衡。
+  传说中有一套神器散落大陆各处，其中之一为"炎之心"。
+
+# --- 故事开头 ---
+story_start: |
+  深夜，林远在家族废墟中挖掘父亲遗物时，发现了一块刻有火焰纹章的石板。
+  石板上浮现出一行发光的文字："炎之心，藏于龙眠谷。"
+  就在此时，外面传来了脚步声——有人正在接近废墟。
+
+# --- 故事结尾（必须达成） ---
+story_end: |
+  林远找到炎之心，击败幕后黑手（王国宰相莫里斯），
+  成为新一代的火焰守护者，为家族洗清冤屈。
+  # 留空则 AI 自动设计结局
+
+# --- 字数与版本设置 ---
+target_word_count: 8000
+num_versions: 3          # 并行预演版本数 (1-500，推荐 3~10)
+
+# --- 写作风格（可选） ---
+# writing_style: "鲁迅"    # 留空则不模仿特定作家，可选值见 writing_style.json
+                            # 117位作家：鲁迅、张爱玲、海明威、村上春树…
+
+# --- API 设置 ---
+# api_key: "sk-ant-..."    # 或通过环境变量设置（各提供商有专属环境变量）
+model: "claude-sonnet-4-6"
+api_provider: "anthropic"  # 支持: anthropic / openai / google / deepseek / moonshot
+                            #       zhipu / qwen / baichuan / minimax / grok / mistral / cohere / custom
+# api_base_url: ""         # 仅 custom 或需要代理时需要手动填写
+
+# --- 约束设置 ---
+max_npcs: 30
+total_token_budget: 0   # 0 = 不限制
+max_chapters: 30
+version_timeout_seconds: 1800  # 30 分钟
+max_tokens_per_call: 4000
+repeat_similarity_threshold: 0.9

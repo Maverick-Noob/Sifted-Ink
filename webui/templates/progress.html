@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生成中... — 选墨集 / Sifted-Ink</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">✦ 选墨集 <span style="font-size:0.5em;opacity:0.6;">Sifted-Ink</span></div>
+            <p class="subtitle" id="phase-label">准备中...</p>
+        </header>
+
+        <!-- Status -->
+        <div class="card" style="text-align:center;">
+            <div id="status-area">
+                <div class="spinner"></div>
+                <p style="margin-top:1rem;color:var(--text-secondary);" id="status-message">正在启动预演引擎...</p>
+            </div>
+            <div class="progress-bar" style="margin-top:1.5rem;">
+                <div class="fill" id="progress-fill" style="width:0%;"></div>
+            </div>
+            <p style="font-size:0.8rem;color:var(--text-muted);" id="progress-text">0%</p>
+        </div>
+
+        <!-- Version progress -->
+        <div class="card" id="versions-card" style="display:none;">
+            <div class="card-header">
+                <span class="icon">📊</span>
+                <h3>版本进度</h3>
+            </div>
+            <div class="version-grid" id="version-grid"></div>
+        </div>
+
+        <!-- Log stream -->
+        <div class="card" id="log-card" style="display:none;">
+            <div class="card-header">
+                <span class="icon">📝</span>
+                <h3>实时日志</h3>
+            </div>
+            <div class="log-stream" id="log-stream"></div>
+        </div>
+
+        <!-- Cancel / Back button -->
+        <div style="text-align:center;margin-top:1.5rem;">
+            <button class="btn btn-outline" id="cancel-btn" onclick="cancelRun()">
+                ⏹ 取消生成
+            </button>
+            <a href="/" class="btn btn-primary" id="back-btn" style="display:none;">
+                🏠 返回首页
+            </a>
+        </div>
+
+        <footer>选墨集 / Sifted-Ink v1.0 · Author: Maverick-Noob / 布河狸</footer>
+    </div>
+
+    <script>
+    const RUN_ID = "{{ run_id }}";
+    const versionGrid = document.getElementById('version-grid');
+    const logStream = document.getElementById('log-stream');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    const statusMessage = document.getElementById('status-message');
+    const phaseLabel = document.getElementById('phase-label');
+    const spinner = document.querySelector('.spinner');
+
+    const versions = {};
+    let cancelled = false;
+
+    function addLog(msg, cls = '') {
+        document.getElementById('log-card').style.display = 'block';
+        const line = document.createElement('div');
+        line.className = 'line ' + cls;
+        line.textContent = new Date().toLocaleTimeString() + '  ' + msg;
+        logStream.appendChild(line);
+        logStream.scrollTop = logStream.scrollHeight;
+    }
+
+    function updateVersion(data) {
+        document.getElementById('versions-card').style.display = 'block';
+        versions[data.version_id] = data;
+
+        // Redraw
+        versionGrid.innerHTML = Object.values(versions).map(v => {
+            const isWinner = v.is_winner ? ' winner' : '';
+            const status = v.reached_ending ? '✅ 完成' : '🔄 进行中';
+            return `
+                <div class="version-card${isWinner}">
+                    <div style="font-size:0.8rem;color:var(--text-muted);">版本 ${v.version_id}</div>
+                    <div class="score">${v.score > 0 ? v.score.toFixed(1) : '—'}</div>
+                    <div style="font-size:0.8rem;">${v.chapters} 章 · ${v.words} 字</div>
+                    <div style="font-size:0.75rem;margin-top:0.25rem;">${status}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // SSE connection
+    const evtSource = new EventSource(`/api/stream/${RUN_ID}`);
+
+    function onTerminalState() {
+        document.getElementById('cancel-btn').style.display = 'none';
+        document.getElementById('back-btn').style.display = 'inline-flex';
+    }
+
+    evtSource.addEventListener('status', (e) => {
+        const data = JSON.parse(e.data);
+        statusMessage.textContent = data.message;
+        progressFill.style.width = data.progress + '%';
+        progressText.textContent = data.progress + '%';
+
+        if (data.status === 'done') {
+            spinner.style.display = 'none';
+            statusMessage.innerHTML = '✅ ' + data.message;
+            addLog(data.message, 'success');
+            onTerminalState();
+        } else if (data.status === 'error') {
+            spinner.style.display = 'none';
+            statusMessage.innerHTML = '❌ ' + data.message;
+            addLog(data.message, 'warning');
+            onTerminalState();
+        } else if (data.status === 'cancelled') {
+            spinner.style.display = 'none';
+            statusMessage.innerHTML = '⏹ ' + data.message;
+            addLog(data.message, 'warning');
+            onTerminalState();
+        } else {
+            addLog(data.message);
+        }
+    });
+
+    evtSource.addEventListener('phase', (e) => {
+        const data = JSON.parse(e.data);
+        phaseLabel.textContent = '阶段 ' + data.phase + '/3: ' + data.label;
+        addLog('▶ ' + data.label, 'info');
+    });
+
+    evtSource.addEventListener('log', (e) => {
+        const data = JSON.parse(e.data);
+        const cls = data.level === 'warning' ? 'warning' :
+                    data.level === 'error' ? 'warning' :
+                    data.level === 'info' ? 'info' : '';
+        addLog(data.message, cls);
+    });
+
+    evtSource.addEventListener('version', (e) => {
+        const data = JSON.parse(e.data);
+        updateVersion(data);
+        addLog(`版本 ${data.version_id}: ${data.chapters}章, ${data.words}字, 分数 ${data.score.toFixed(1)}`);
+    });
+
+    evtSource.addEventListener('result_ready', (e) => {
+        const data = JSON.parse(e.data);
+        addLog('🎉 生成完成！', 'success');
+        // Redirect to result page after a short delay
+        setTimeout(() => {
+            window.location.href = `/result/${RUN_ID}`;
+        }, 1500);
+    });
+
+    evtSource.addEventListener('error', (e) => {
+        if (e.data) {
+            const data = JSON.parse(e.data);
+            addLog('❌ ' + data.message, 'warning');
+        }
+    });
+
+    evtSource.addEventListener('close', () => {
+        evtSource.close();
+    });
+
+    evtSource.onerror = () => {
+        // EventSource will auto-reconnect; if we're done/cancelled, close it
+        if (cancelled) {
+            evtSource.close();
+        }
+    };
+
+    function cancelRun() {
+        cancelled = true;
+        fetch(`/api/cancel/${RUN_ID}`, { method: 'POST' });
+        document.getElementById('cancel-btn').disabled = true;
+        document.getElementById('cancel-btn').textContent = '正在取消...';
+        // Show back button after short delay in case SSE close doesn't fire
+        setTimeout(() => { onTerminalState(); }, 3000);
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,478 @@
+"""
+Multi-format novel exporter — MD / TXT / EPUB / PDF / MOBI / AZW.
+
+Beautiful typography with proper Chinese formatting for all output formats.
+"""
+
+import os
+import re
+import shutil
+import subprocess
+from pathlib import Path
+from typing import Optional
+
+from .utils import logger
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Shared helpers
+# ═══════════════════════════════════════════════════════════════════════
+
+def _clean_markdown(text: str) -> str:
+    """Strip markdown formatting to produce plain text."""
+    # Remove headers markers but keep the text
+    text = re.sub(r'^#{1,6}\s+', '', text, flags=re.MULTILINE)
+    # Remove bold/italic markers
+    text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
+    text = re.sub(r'\*(.+?)\*', r'\1', text)
+    text = re.sub(r'__(.+?)__', r'\1', text)
+    text = re.sub(r'_(.+?)_', r'\1', text)
+    # Remove blockquote markers
+    text = re.sub(r'^>\s?', '', text, flags=re.MULTILINE)
+    # Remove horizontal rules
+    text = re.sub(r'^---+\s*$', '', text, flags=re.MULTILINE)
+    # Remove inline code markers
+    text = re.sub(r'`(.+?)`', r'\1', text)
+    # Collapse multiple blank lines
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    return text.strip()
+
+
+def _parse_chapters(novel_text: str) -> list[tuple[str, str]]:
+    """
+    Parse novel markdown into list of (chapter_title, chapter_content).
+    Chapters are delimited by ## headers.
+    """
+    # Split on ## headers
+    parts = re.split(r'^##\s+(.+)$', novel_text, flags=re.MULTILINE)
+
+    chapters = []
+    # parts[0] = everything before first ## (title page, preamble)
+    preamble = parts[0].strip() if parts else ""
+
+    # parts[1:] = alternating title, content pairs
+    for i in range(1, len(parts), 2):
+        title = parts[i].strip() if i < len(parts) else ""
+        content = parts[i + 1].strip() if i + 1 < len(parts) else ""
+        if title or content:
+            chapters.append((title, content))
+
+    return chapters, preamble
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Markdown
+# ═══════════════════════════════════════════════════════════════════════
+
+def export_md(novel_text: str, output_path: str) -> str:
+    """Export as Markdown (the native format)."""
+    Path(output_path).write_text(novel_text, encoding="utf-8")
+    return output_path
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Plain Text
+# ═══════════════════════════════════════════════════════════════════════
+
+TXT_CSS = """
+Plain text export — clean, well-spaced formatting optimized for reading.
+"""
+
+
+def export_txt(novel_text: str, output_path: str) -> str:
+    """Export as plain text with clean formatting."""
+    # Remove HTML comment metadata block (invisible in MD, visible noise in TXT)
+    text = re.sub(r'<!-- GENERATION_META.*?-->', '', novel_text, flags=re.DOTALL)
+    text = _clean_markdown(text)
+
+    # Add decorative chapter separators
+    lines = []
+    for line in text.split('\n'):
+        stripped = line.strip()
+        if stripped.startswith('第') and '章' in stripped[:10]:
+            lines.append('')
+            lines.append('─' * 50)
+            lines.append(f'  {stripped}')
+            lines.append('─' * 50)
+            lines.append('')
+        else:
+            lines.append(line)
+
+    result = '\n'.join(lines)
+    Path(output_path).write_text(result, encoding="utf-8")
+    return output_path
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# EPUB
+# ═══════════════════════════════════════════════════════════════════════
+
+EPUB_CSS = """
+body {
+    font-family: "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
+    line-height: 1.9;
+    margin: 5%;
+    color: #2c2c2c;
+}
+h1 {
+    text-align: center;
+    font-size: 1.8em;
+    margin: 2em 0 1em;
+    font-weight: bold;
+}
+h2 {
+    font-size: 1.3em;
+    margin: 2em 0 0.8em;
+    page-break-before: always;
+    color: #1a1a1a;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 0.3em;
+}
+p {
+    text-indent: 2em;
+    margin: 0.5em 0;
+}
+blockquote {
+    font-style: italic;
+    color: #666;
+    border-left: 3px solid #999;
+    padding-left: 1em;
+    margin: 1em 0;
+}
+"""
+
+
+def export_epub(novel_text: str, output_path: str, title: str = "小说", author: str = "选墨集") -> str:
+    """Export as EPUB with proper Chinese typography."""
+    try:
+        from ebooklib import epub
+    except ImportError:
+        raise ImportError("需要安装 ebooklib: pip install ebooklib")
+
+    book = epub.EpubBook()
+    book.set_identifier(f"sifted-ink-{hash(title)}")
+    book.set_title(title)
+    book.set_language("zh-CN")
+    book.add_author(author)
+
+    # Embed generation metadata
+    book.add_metadata("DC", "publisher", "选墨集 / Sifted-Ink v1.0")
+    book.add_metadata("DC", "date", datetime.now().strftime("%Y-%m-%dT%H:%M:%S"))
+    book.add_metadata("DC", "description",
+        f"AI-generated by 选墨集 / Sifted-Ink on {datetime.now().strftime('%Y-%m-%d')}."
+    )
+
+    # Add CSS
+    style = epub.EpubItem(
+        uid="style", file_name="style.css", media_type="text/css",
+        content=EPUB_CSS.encode("utf-8"),
+    )
+    book.add_item(style)
+
+    # Parse chapters
+    chapters, preamble = _parse_chapters(novel_text)
+    spine = ["nav"]
+    toc = []
+
+    # Title page
+    if preamble:
+        c1 = epub.EpubHtml(
+            title="扉页", file_name="chap_00.xhtml", lang="zh-CN",
+        )
+        c1.content = f"<html><body>\n{preamble}\n</body></html>".encode("utf-8")
+        c1.add_item(style)
+        book.add_item(c1)
+
+    # Chapter files
+    for i, (chap_title, content) in enumerate(chapters, 1):
+        chapter = epub.EpubHtml(
+            title=chap_title, file_name=f"chap_{i:02d}.xhtml", lang="zh-CN",
+        )
+        # Convert markdown content to basic HTML
+        html_content = _md_to_html(content)
+        chapter.content = f"""<html>
+<head><link rel="stylesheet" type="text/css" href="style.css"/></head>
+<body>
+<h2>{chap_title}</h2>
+{html_content}
+</body></html>""".encode("utf-8")
+        chapter.add_item(style)
+        book.add_item(chapter)
+        spine.append(chapter)
+        toc.append(epub.Link(f"chap_{i:02d}.xhtml", chap_title, f"ch{i}"))
+
+    book.toc = toc
+    book.spine = spine
+    book.add_item(epub.EpubNcx())
+    book.add_item(epub.EpubNav())
+
+    epub.write_epub(output_path, book)
+    return output_path
+
+
+def _md_to_html(md_text: str) -> str:
+    """Simple markdown-to-HTML conversion for EPUB."""
+    # Bold
+    md_text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', md_text)
+    # Italic
+    md_text = re.sub(r'\*(.+?)\*', r'<em>\1</em>', md_text)
+    # Blockquotes
+    lines = md_text.split('\n')
+    result = []
+    in_blockquote = False
+    for line in lines:
+        if line.startswith('> '):
+            if not in_blockquote:
+                result.append('<blockquote>')
+                in_blockquote = True
+            result.append(f'<p>{line[2:]}</p>')
+        else:
+            if in_blockquote:
+                result.append('</blockquote>')
+                in_blockquote = False
+            if line.strip():
+                if line.startswith('#'):
+                    continue  # skip headers (already rendered by template)
+                result.append(f'<p>{line}</p>')
+            else:
+                result.append('<br/>')
+    if in_blockquote:
+        result.append('</blockquote>')
+    return '\n'.join(result)
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# PDF
+# ═══════════════════════════════════════════════════════════════════════
+
+# Try to find a Chinese font on the system
+def _find_chinese_font() -> Optional[str]:
+    """Find a CJK font available on the system."""
+    candidates = [
+        # Windows
+        "C:/Windows/Fonts/msyh.ttc",       # Microsoft YaHei
+        "C:/Windows/Fonts/simsun.ttc",      # SimSun
+        "C:/Windows/Fonts/simhei.ttf",      # SimHei
+        "C:/Windows/Fonts/STSONG.TTF",      # STSong
+        # macOS
+        "/System/Library/Fonts/PingFang.ttc",
+        "/System/Library/Fonts/STHeiti Light.ttc",
+        # Linux
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+        "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+        "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return None
+
+
+def export_pdf(novel_text: str, output_path: str, title: str = "小说") -> str:
+    """Export as PDF with Chinese typography and proper layout."""
+    try:
+        from fpdf import FPDF
+    except ImportError:
+        raise ImportError("需要安装 fpdf2: pip install fpdf2")
+
+    font_path = _find_chinese_font()
+    if not font_path:
+        raise RuntimeError(
+            "未找到中文字体。请安装中文字体，或将字体文件路径设置为 "
+            "NOVEL_FONT_PATH 环境变量。\n"
+            "Windows: C:/Windows/Fonts/msyh.ttc\n"
+            "macOS: /System/Library/Fonts/PingFang.ttc"
+        )
+
+    # Check env override
+    font_path = os.environ.get("NOVEL_FONT_PATH", font_path)
+
+    class NovelPDF(FPDF):
+        def __init__(self, title):
+            super().__init__("P", "mm", "A5")  # A5 is more book-like
+            self.book_title = title
+            self.set_auto_page_break(True, 20)
+
+        def header(self):
+            if self.page_no() > 1:
+                self.set_font("CJK", "", 8)
+                self.set_text_color(150, 150, 150)
+                self.cell(0, 6, self.book_title, align="C")
+                self.ln(8)
+
+        def footer(self):
+            self.set_y(-15)
+            self.set_font("CJK", "", 7)
+            self.set_text_color(160, 160, 160)
+            # Left: project name, Right: page number
+            self.cell(80, 10, "Generated by 选墨集 / Sifted-Ink", align="L")
+            self.cell(0, 10, str(self.page_no()), align="R")
+
+    pdf = NovelPDF(title)
+    pdf.set_margin(18)
+
+    # PDF metadata
+    pdf.set_title(title)
+    pdf.set_author("选墨集 / Sifted-Ink")
+    pdf.set_creator("选墨集 / Sifted-Ink v1.0")
+    pdf.set_subject(f"AI-generated novel — {title}")
+
+    # Register CJK font
+    pdf.add_font("CJK", "", font_path, uni=True)
+    pdf.add_font("CJK", "B", font_path, uni=True)  # fpdf2 treats same file as bold
+
+    # ── Title page ──
+    pdf.add_page()
+    pdf.ln(40)
+    pdf.set_font("CJK", "B", 22)
+    pdf.set_text_color(40, 40, 40)
+    pdf.multi_cell(0, 14, title, align="C")
+    pdf.ln(8)
+    pdf.set_font("CJK", "", 11)
+    pdf.set_text_color(120, 120, 120)
+    pdf.cell(0, 8, "由 选墨集 / Sifted-Ink 生成", align="C")
+    pdf.ln(20)
+    pdf.set_draw_color(180, 180, 180)
+    pdf.line(40, pdf.get_y(), pdf.w - 40, pdf.get_y())
+
+    # ── Chapters ──
+    chapters, preamble = _parse_chapters(novel_text)
+    plain_text = _clean_markdown(novel_text)
+
+    for chap_title, content in chapters:
+        pdf.add_page()
+        # Chapter title
+        pdf.set_font("CJK", "B", 14)
+        pdf.set_text_color(40, 40, 40)
+        pdf.multi_cell(0, 10, chap_title, align="C")
+        pdf.ln(6)
+        # Chapter content
+        pdf.set_font("CJK", "", 10)
+        pdf.set_text_color(60, 60, 60)
+
+        paragraphs = [p.strip() for p in content.split('\n') if p.strip()]
+        for para in paragraphs:
+            # Remove markdown formatting
+            para = _clean_markdown(para)
+            if para:
+                pdf.multi_cell(0, 7, para, align="J")
+                pdf.ln(1)
+
+    pdf.output(output_path)
+    return output_path
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# MOBI / AZW (via Calibre ebook-convert)
+# ═══════════════════════════════════════════════════════════════════════
+
+def _find_calibre_convert() -> Optional[str]:
+    """Find Calibre's ebook-convert executable."""
+    candidates = [
+        "ebook-convert",
+        "ebook-convert.exe",
+        "C:/Program Files/Calibre2/ebook-convert.exe",
+        "C:/Program Files (x86)/Calibre2/ebook-convert.exe",
+        "/Applications/calibre.app/Contents/MacOS/ebook-convert",
+    ]
+    for path in candidates:
+        if shutil.which(path) or os.path.exists(path):
+            return path if os.path.exists(path) else shutil.which(path)
+    return None
+
+
+def export_mobi(novel_text: str, output_path: str, title: str = "小说", author: str = "选墨集") -> str:
+    """
+    Export as MOBI by first generating EPUB, then converting via Calibre.
+    Falls back to EPUB if Calibre is not installed.
+    """
+    # Generate EPUB first
+    epub_path = output_path.replace(".mobi", ".epub")
+    export_epub(novel_text, epub_path, title, author)
+
+    converter = _find_calibre_convert()
+    if converter:
+        try:
+            subprocess.run(
+                [converter, epub_path, output_path],
+                check=True, capture_output=True, timeout=120,
+            )
+            logger.info(f"MOBI exported via Calibre: {output_path}")
+            return output_path
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+            logger.warning(f"Calibre conversion failed: {e}")
+
+    # Fallback: rename EPUB as .epub but tell user
+    logger.warning(
+        "Calibre (ebook-convert) 未安装，无法生成 MOBI。"
+        "请安装 Calibre: https://calibre-ebook.com/"
+    )
+    raise RuntimeError(
+        "MOBI 格式需要 Calibre。请安装 Calibre 后重试，"
+        "或使用 EPUB 格式（功能相同，兼容更多设备）。"
+    )
+
+
+def export_azw(novel_text: str, output_path: str, title: str = "小说", author: str = "选墨集") -> str:
+    """Export as AZW3 (Amazon Kindle format). Same pipeline as MOBI."""
+    return export_mobi(novel_text, output_path, title, author)
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Unified export dispatcher
+# ═══════════════════════════════════════════════════════════════════════
+
+FORMATS = {
+    "md":    {"ext": ".md",   "label": "Markdown",   "mime": "text/markdown"},
+    "txt":   {"ext": ".txt",  "label": "纯文本",       "mime": "text/plain"},
+    "epub":  {"ext": ".epub", "label": "EPUB 电子书",  "mime": "application/epub+zip"},
+    "pdf":   {"ext": ".pdf",  "label": "PDF 文档",     "mime": "application/pdf"},
+    "mobi":  {"ext": ".mobi", "label": "Kindle (MOBI)", "mime": "application/x-mobipocket-ebook"},
+    "azw":   {"ext": ".azw3","label": "Kindle (AZW3)", "mime": "application/vnd.amazon.mobi8-ebook"},
+}
+
+
+def export_novel(
+    novel_text: str,
+    output_dir: str,
+    format: str,
+    title: str = "小说",
+    author: str = "选墨集",
+) -> str:
+    """
+    Export novel to the specified format.
+
+    Args:
+        novel_text: Markdown novel content
+        output_dir: Directory to save the file
+        format: One of "md", "txt", "epub", "pdf", "mobi", "azw"
+        title: Book title
+        author: Book author
+
+    Returns: Path to the exported file
+    """
+    if format not in FORMATS:
+        raise ValueError(f"不支持的格式: {format}。支持: {', '.join(FORMATS)}")
+
+    safe_title = re.sub(r'[\\/*?:"<>|]', '_', title)[:50]
+    ext = FORMATS[format]["ext"]
+    output_path = os.path.join(output_dir, f"{safe_title}{ext}")
+
+    exporters = {
+        "md":   export_md,
+        "txt":  export_txt,
+        "epub": export_epub,
+        "pdf":  export_pdf,
+        "mobi": export_mobi,
+        "azw":  export_azw,
+    }
+
+    export_fn = exporters[format]
+
+    # EPUB/MOBI/AZW/PDF accept title/author
+    if format in ("epub", "mobi", "azw"):
+        return export_fn(novel_text, output_path, title, author)
+    elif format == "pdf":
+        return export_fn(novel_text, output_path, title)
+    else:
+        return export_fn(novel_text, output_path)

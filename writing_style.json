@@ -1,0 +1,2040 @@
+[
+  {
+    "name": "鲁迅",
+    "region": "中国",
+    "style": "中国现代文学奠基人。以冷峻犀利的笔触解剖国民性，将西方现代小说技巧与本土批判精神融合，开创了中国白话小说的现实主义传统。",
+    "representative_works": [
+      "《狂人日记》",
+      "《阿Q正传》"
+    ],
+    "death_year": 1936,
+    "is_public_domain": true
+  },
+  {
+    "name": "茅盾",
+    "region": "中国",
+    "style": "社会剖析派代表。以宏大的史诗视角描绘中国社会的变迁，擅长塑造时代浪潮中的知识分子与资本家形象。",
+    "representative_works": [
+      "《子夜》",
+      "《林家铺子》"
+    ],
+    "death_year": 1981,
+    "is_public_domain": false
+  },
+  {
+    "name": "巴金",
+    "region": "中国",
+    "style": "激情澎湃的人道主义作家。作品充满对封建礼教的控诉和对青年一代的深情关怀，情感真挚而富有感染力。",
+    "representative_works": [
+      "《家》",
+      "《寒夜》"
+    ],
+    "death_year": 2005,
+    "is_public_domain": false
+  },
+  {
+    "name": "老舍",
+    "region": "中国",
+    "style": "京味文学的宗师。以地道的北京方言和幽默讽刺的笔调，描绘市井平民生活的悲欢离合，充满浓郁的地域文化气息。",
+    "representative_works": [
+      "《骆驼祥子》",
+      "《四世同堂》"
+    ],
+    "death_year": 1966,
+    "is_public_domain": true
+  },
+  {
+    "name": "曹禺",
+    "region": "中国",
+    "style": "中国现代话剧奠基人。以精巧的戏剧结构和强烈的情感冲突，探索人性深处的挣扎与命运的无常。",
+    "representative_works": [
+      "《雷雨》",
+      "《日出》"
+    ],
+    "death_year": 1996,
+    "is_public_domain": false
+  },
+  {
+    "name": "沈从文",
+    "region": "中国",
+    "style": "乡土抒情小说大师。以诗意的笔调描绘湘西边城的自然风光与淳朴人性，构建了独特的“湘西世界”。",
+    "representative_works": [
+      "《边城》",
+      "《长河》"
+    ],
+    "death_year": 1988,
+    "is_public_domain": false
+  },
+  {
+    "name": "张爱玲",
+    "region": "中国",
+    "style": "海上文学传奇。以苍凉的底色书写都市男女的情感纠葛，语言精致华美，于日常中见传奇，于传奇中见人性深渊。",
+    "representative_works": [
+      "《倾城之恋》",
+      "《金锁记》"
+    ],
+    "death_year": 1995,
+    "is_public_domain": false
+  },
+  {
+    "name": "钱钟书",
+    "region": "中国",
+    "style": "博学幽默的智者。以渊博的学识和辛辣的讽刺，书写现代知识分子的困境与弱点，文风机智幽默。",
+    "representative_works": [
+      "《围城》",
+      "《写在人生边上》"
+    ],
+    "death_year": 1998,
+    "is_public_domain": false
+  },
+  {
+    "name": "萧红",
+    "region": "中国",
+    "style": "民国文学的洛神。以独特的散文化笔调和女性视角，书写东北大地上底层民众的生存挣扎与命运悲歌。",
+    "representative_works": [
+      "《呼兰河传》",
+      "《生死场》"
+    ],
+    "death_year": 1942,
+    "is_public_domain": true
+  },
+  {
+    "name": "莫言",
+    "region": "中国",
+    "style": "2012年诺贝尔文学奖得主，寻根文学代表人物。将高密东北乡的民间传说、历史现实与魔幻现实主义融合，想象力瑰丽狂野。",
+    "representative_works": [
+      "《红高粱家族》",
+      "《蛙》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "余华",
+    "region": "中国",
+    "style": "先锋派文学代表。早年以冷峻暴力的笔触揭示人性的残酷，后期转向温情的生命叙事，文字简洁有力，情感冲击力极强。",
+    "representative_works": [
+      "《活着》",
+      "《许三观卖血记》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "贾平凹",
+    "region": "中国",
+    "style": "陕派文学巨匠。扎根于商州大地，以古朴浑厚的笔调书写乡土中国的变迁与小人物的命运沉浮。",
+    "representative_works": [
+      "《废都》",
+      "《秦腔》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "陈忠实",
+    "region": "中国",
+    "style": "关中平原的史诗书写者。以一部《白鹿原》浓缩了半个多世纪中国乡村的历史风云，厚重而深邃。",
+    "representative_works": [
+      "《白鹿原》"
+    ],
+    "death_year": 2016,
+    "is_public_domain": false
+  },
+  {
+    "name": "王安忆",
+    "region": "中国",
+    "style": "海派文学传人。以细腻绵密的笔触书写上海都市与女性的命运，对日常生活的细节有精微的观察与呈现。",
+    "representative_works": [
+      "《长恨歌》",
+      "《小城之恋》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "阿来",
+    "region": "中国",
+    "style": "藏族作家。以独特的民族视角书写西藏大地的历史变迁与文化冲突，语言诗意而富有哲思。",
+    "representative_works": [
+      "《尘埃落定》",
+      "《云中记》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "迟子建",
+    "region": "中国",
+    "style": "北国风光的诗意书写者。以温情而坚韧的笔调描绘大兴安岭边陲小镇的风土人情，在严寒中绽放生命的暖意。",
+    "representative_works": [
+      "《额尔古纳河右岸》",
+      "《白雪乌鸦》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "刘震云",
+    "region": "中国",
+    "style": "新写实主义代表。以冷幽默的笔触书写当代中国人的生存智慧与荒诞处境，被誉为“中国当代的契诃夫”。",
+    "representative_works": [
+      "《一句顶一万句》",
+      "《我不是潘金莲》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "金宇澄",
+    "region": "中国",
+    "style": "海派方言写作的继承者。以沪语方言重构上海市民生活的日常记忆，文本形式独特，充满市井烟火气。",
+    "representative_works": [
+      "《繁花》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "韩少功",
+    "region": "中国",
+    "style": "寻根文学的发起者之一。以思辨性的写作探索文化之根，作品兼具思想深度与形式创新。",
+    "representative_works": [
+      "《爸爸爸》",
+      "《马桥词典》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "格非",
+    "region": "中国",
+    "style": "先锋文学代表，“江南三部曲”作者。以迷宫般的叙事结构和典雅的语言，书写知识分子的精神史。",
+    "representative_works": [
+      "《人面桃花》",
+      "《山河入梦》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "苏童",
+    "region": "中国",
+    "style": "新历史主义代表。以阴柔凄美的笔调书写南方历史与女性命运，香椿树街系列成为当代文学的重要符号。",
+    "representative_works": [
+      "《妻妾成群》",
+      "《黄雀记》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "李洱",
+    "region": "中国",
+    "style": "知识分子写作代表。以黑色幽默和反讽的笔调，书写当代中国知识分子的精神困境与生存悖论。",
+    "representative_works": [
+      "《应物兄》",
+      "《花腔》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "徐则臣",
+    "region": "中国",
+    "style": "70后代表作家。以“京漂”和“运河”两大系列，书写当代中国人的迁徙命运与文化乡愁。",
+    "representative_works": [
+      "《北上》",
+      "《耶路撒冷》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "王小波",
+    "region": "中国",
+    "style": "自由主义精神的文学骑士。以黑色幽默与荒诞反讽解构宏大叙事，对智慧和自由的追求贯穿始终。",
+    "representative_works": [
+      "《黄金时代》",
+      "《沉默的大多数》"
+    ],
+    "death_year": 1997,
+    "is_public_domain": false
+  },
+  {
+    "name": "金庸",
+    "region": "中国",
+    "style": "武侠小说一代宗师。将中国传统文化与江湖恩怨融为一体，创造了波澜壮阔的武侠世界，塑造了无数深入人心的英雄形象。",
+    "representative_works": [
+      "《射雕英雄传》",
+      "《天龙八部》"
+    ],
+    "death_year": 2018,
+    "is_public_domain": false
+  },
+  {
+    "name": "川端康成",
+    "region": "日本",
+    "style": "1968年诺贝尔文学奖得主。日本新感觉派代表，作品融汇日本传统美学与西方现代主义，追求极致的美感与虚无的意境，笔触纤细唯美。",
+    "representative_works": [
+      "《雪国》",
+      "《古都》"
+    ],
+    "death_year": 1972,
+    "is_public_domain": true
+  },
+  {
+    "name": "村上春树",
+    "region": "日本",
+    "style": "后现代主义旗手。作品融合爵士乐、流行文化、超现实元素与孤独的都市生活，风格轻盈又充满隐喻，被誉为“80年代的文学旗手”。",
+    "representative_works": [
+      "《挪威的森林》",
+      "《海边的卡夫卡》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "夏目漱石",
+    "region": "日本",
+    "style": "日本近代文学巨匠。以知识分子的视角批判明治社会的弊端与“文明开化”的虚伪，幽默中透着深刻的孤独与绝望。",
+    "representative_works": [
+      "《我是猫》",
+      "《心》"
+    ],
+    "death_year": 1916,
+    "is_public_domain": true
+  },
+  {
+    "name": "太宰治",
+    "region": "日本",
+    "style": "无赖派文学代表。以私小说形式书写自身的颓废、绝望与自我毁灭，情感浓烈，被称为“永远的少年”。",
+    "representative_works": [
+      "《人间失格》",
+      "《斜阳》"
+    ],
+    "death_year": 1948,
+    "is_public_domain": true
+  },
+  {
+    "name": "三岛由纪夫",
+    "region": "日本",
+    "style": "浪漫的暴力美学大师。作品融合古典日本美学与极端的行为主义，追求“行动”与“死亡”的极致之美，文风华丽而暴烈。",
+    "representative_works": [
+      "《金阁寺》",
+      "《假面的告白》"
+    ],
+    "death_year": 1970,
+    "is_public_domain": true
+  },
+  {
+    "name": "大江健三郎",
+    "region": "日本",
+    "style": "1994年诺贝尔文学奖得主。以反战、人权和残疾儿为主题的沉重叙事，深刻反思战争、核武器与当代人的存在困境。",
+    "representative_works": [
+      "《个人的体验》",
+      "《万延元年的Football》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "芥川龙之介",
+    "region": "日本",
+    "style": "短篇小说之神。以冷峻的知性、精湛的技巧和独特的“历史小说”手法，深入挖掘人性深处的自私、丑恶与利己主义。",
+    "representative_works": [
+      "《罗生门》",
+      "《地狱变》"
+    ],
+    "death_year": 1927,
+    "is_public_domain": true
+  },
+  {
+    "name": "谷崎润一郎",
+    "region": "日本",
+    "style": "恶魔主义唯美派大师。作品讴歌女性崇拜与感官之美，从早期的变态美学探索到晚期的古典回归，始终追求极致的文学之美。",
+    "representative_works": [
+      "《春琴抄》",
+      "《细雪》"
+    ],
+    "death_year": 1965,
+    "is_public_domain": true
+  },
+  {
+    "name": "志贺直哉",
+    "region": "日本",
+    "style": "“小说之神”，白桦派代表。日语文学的完美主义者，对细节的打磨达到极致，其《暗夜行路》被誉为私小说的最高峰。",
+    "representative_works": [
+      "《暗夜行路》",
+      "《在城崎》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "松本清张",
+    "region": "日本",
+    "style": "社会派推理小说开创者。打破本格推理的框架，将推理小说提升到探讨社会现实和人性的高度。",
+    "representative_works": [
+      "《点与线》",
+      "《砂器》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "横沟正史",
+    "region": "日本",
+    "style": "本格推理大师。作品奇幻莫测，充满猎奇与诡谲的气氛，将推理小说与日本乡土风情结合，氛围奇诡。",
+    "representative_works": [
+      "《狱门岛》",
+      "《八墓村》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "东野圭吾",
+    "region": "日本",
+    "style": "当代推理天王。作品涵盖本格、社会派等多种风格，以精巧的诡计设计和深刻的人性描摹吸引全球读者。",
+    "representative_works": [
+      "《解忧杂货店》",
+      "《白夜行》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "紫式部",
+    "region": "日本",
+    "style": "日本古典文学之母。以细腻的心理描写和风雅的笔触，创作了世界上第一部长篇小说，深刻描绘了平安时代的宫廷生活与女性的情感世界。",
+    "representative_works": [
+      "《源氏物语》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "莎士比亚",
+    "region": "英国",
+    "style": "文艺复兴文学巨匠。将英国语言与戏剧艺术推向巅峰，笔下人物性格复杂、台词隽永，对人性的洞察超越时代。",
+    "representative_works": [
+      "《哈姆雷特》",
+      "《罗密欧与朱丽叶》"
+    ],
+    "death_year": 1616,
+    "is_public_domain": true
+  },
+  {
+    "name": "简·奥斯汀",
+    "region": "英国",
+    "style": "现实主义小说先驱。以细腻入微的笔触描绘英国乡绅阶层的婚恋与社交生活，语言机智幽默，开创了女性写作的独特视角。",
+    "representative_works": [
+      "《傲慢与偏见》",
+      "《理智与情感》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "查尔斯·狄更斯",
+    "region": "英国",
+    "style": "批判现实主义大师。笔下呈现了维多利亚时代伦敦的全景画卷，擅长塑造生动的小人物，对社会的黑暗与不公抱有深切的同情。",
+    "representative_works": [
+      "《雾都孤儿》",
+      "《双城记》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "乔治·艾略特",
+    "region": "英国",
+    "style": "维多利亚时期女作家代表。以哲学性的深度探讨道德、宗教与社会变革，文风沉静而富有智识。",
+    "representative_works": [
+      "《米德尔马契》",
+      "《弗洛斯河上的磨坊》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "托马斯·哈代",
+    "region": "英国",
+    "style": "悲观主义诗人。其“威塞克斯小说”系列描绘英国乡村的衰败，笔下人物常常受制于命运与环境，充满宿命感的悲剧色彩。",
+    "representative_works": [
+      "《德伯家的苔丝》",
+      "《无名的裘德》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "艾米莉·勃朗特",
+    "region": "英国",
+    "style": "神秘主义的灵魂写手。一部《呼啸山庄》以极端狂野的情感和复仇的烈火震撼文坛，超越传统爱情小说的格局，触及灵魂的深渊。",
+    "representative_works": [
+      "《呼啸山庄》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "夏洛蒂·勃朗特",
+    "region": "英国",
+    "style": "女性独立意识的先驱。以自传性的笔触书写家庭女教师的命运，塑造了敢于反抗、追求平等的女性形象。",
+    "representative_works": [
+      "《简·爱》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "弗吉尼亚·伍尔夫",
+    "region": "英国",
+    "style": "意识流文学的代表人物。打破传统叙事，深入人物内心的潜意识洪流，探讨时间、性别与生存的瞬间。",
+    "representative_works": [
+      "《到灯塔去》",
+      "《达洛维夫人》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "詹姆斯·乔伊斯",
+    "region": "英国",
+    "style": "现代主义文学的巅峰。以惊人的语言实验和创新技法挑战小说边界，将一天之内都柏林人的意识流动写成文学史上的里程碑。",
+    "representative_works": [
+      "《尤利西斯》",
+      "《都柏林人》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "D·H·劳伦斯",
+    "region": "英国",
+    "style": "情欲与自然的歌者。挑战工业文明对人性与情感的压抑，直率地书写两性关系中的激情与本能，文风强烈而富有诗意。",
+    "representative_works": [
+      "《查特莱夫人的情人》",
+      "《儿子与情人》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "乔治·奥威尔",
+    "region": "英国",
+    "style": "政治讽喻大师。以冷峻犀利的笔触描绘极权主义社会的恐怖图景，作品是对权力、谎言与自由的深刻警醒。",
+    "representative_works": [
+      "《一九八四》",
+      "《动物农场》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "阿加莎·克里斯蒂",
+    "region": "英国",
+    "style": "侦探推理女王。情节布局精巧、诡计设计出神入化，塑造了波洛和马普尔小姐两大经典侦探形象。",
+    "representative_works": [
+      "《无人生还》",
+      "《东方快车谋杀案》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "伊恩·麦克尤恩",
+    "region": "英国",
+    "style": "当代英国文坛的“恐怖伊恩”。前期以黑暗怪诞惊悚成名，后期转向沉静细腻的道德叙事，擅长书写日常生活中的意外与人性幽暗。",
+    "representative_works": [
+      "《赎罪》",
+      "《星期六》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "石黑一雄",
+    "region": "英国",
+    "style": "2017年诺贝尔文学奖得主，日裔英籍作家。融合国际视野与细腻笔触，书写记忆、时间与自我欺骗，文字克制而情感暗涌。",
+    "representative_works": [
+      "《长日将尽》",
+      "《别让我走》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "J·K·罗琳",
+    "region": "英国",
+    "style": "当代奇幻文学女王。以天马行空的想象力和细腻的伏笔，构建了宏大的魔法世界，影响了全球一代读者。",
+    "representative_works": [
+      "《哈利·波特》系列"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "维克多·雨果",
+    "region": "法国",
+    "style": "浪漫主义文学领袖。作品气势恢宏，充满人道主义关怀，以史诗般的笔触描绘法国社会的历史变迁与人性的善恶挣扎。",
+    "representative_works": [
+      "《悲惨世界》",
+      "《巴黎圣母院》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "马塞尔·普鲁斯特",
+    "region": "法国",
+    "style": "意识流小说大师。以惊人的细腻笔触探索回忆、时间与潜意识，其长篇巨著被誉为现代文学的巅峰。",
+    "representative_works": [
+      "《追忆似水年华》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "阿尔贝·加缪",
+    "region": "法国",
+    "style": "存在主义文学大师。以冷峻简洁的笔调书写现代人的荒诞处境与反抗精神，哲学思辨融入叙事之中。",
+    "representative_works": [
+      "《局外人》",
+      "《鼠疫》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "让-保罗·萨特",
+    "region": "法国",
+    "style": "存在主义哲学与文学的双重旗手。通过小说和戏剧演绎自由、责任与选择的哲学命题，文学是他哲学的具象化。",
+    "representative_works": [
+      "《恶心》",
+      "《墙》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "西蒙娜·德·波伏娃",
+    "region": "法国",
+    "style": "女权主义理论的奠基人。在小说中探讨女性在父权社会中的生存困境与自我觉醒，文学是她思想的延伸与实践。",
+    "representative_works": [
+      "《第二性》",
+      "《女客》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "大仲马",
+    "region": "法国",
+    "style": "通俗小说之王。以扣人心弦的情节、鲜明的角色和快节奏的叙事著称，其作品是冒险与复仇文学的典范。",
+    "representative_works": [
+      "《基督山伯爵》",
+      "《三个火枪手》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "儒勒·凡尔纳",
+    "region": "法国",
+    "style": "科幻小说之父。以惊人的科学预见性和扣人心弦的冒险故事，描绘了人类对未知世界的探索与想象。",
+    "representative_works": [
+      "《海底两万里》",
+      "《八十天环游地球》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "居斯塔夫·福楼拜",
+    "region": "法国",
+    "style": "现实主义与美学追求的完美结合者。主张“客观而无动于衷”的创作原则，字斟句酌，追求语言的精确与完美。",
+    "representative_works": [
+      "《包法利夫人》",
+      "《情感教育》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "安德烈·纪德",
+    "region": "法国",
+    "style": "1947年诺贝尔文学奖得主。作品常探讨道德困境与个体解放，风格多变，被誉为“20世纪法国文学最伟大的散文作家”。",
+    "representative_works": [
+      "《田园交响曲》",
+      "《背德者》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "玛格丽特·杜拉斯",
+    "region": "法国",
+    "style": "新小说派代表作家。以破碎的叙事、诗意的语言和炽烈的情感著称，作品多带有自传色彩，探讨欲望与遗忘。",
+    "representative_works": [
+      "《情人》",
+      "《广岛之恋》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "帕特里克·莫迪亚诺",
+    "region": "法国",
+    "style": "2014年诺贝尔文学奖得主。作品围绕记忆、身份与二战占领期的阴霾，以迷离的笔触探寻被遗忘的历史与自我。",
+    "representative_works": [
+      "《暗店街》",
+      "《青春咖啡馆》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "米歇尔·维勒贝克",
+    "region": "法国",
+    "style": "当代争议性作家。以挑衅、直白的笔触书写当代社会的异化、孤独与信仰崩塌，被誉为“法国文学的坏孩子”。",
+    "representative_works": [
+      "《基本粒子》",
+      "《血清素》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "列夫·托尔斯泰",
+    "region": "俄罗斯",
+    "style": "批判现实主义文学的最高峰。以史诗般的宏阔视野和深邃的道德思辨，描绘了俄国社会全景，作品既是对现实的摹写，也是对灵魂的无尽拷问。",
+    "representative_works": [
+      "《战争与和平》",
+      "《安娜·卡列尼娜》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "陀思妥耶夫斯基",
+    "region": "俄罗斯",
+    "style": "人类灵魂的拷问者。以复调式的叙事结构探讨人的非理性、罪恶与救赎，深入人心的深渊，探索信仰与怀疑的边界。",
+    "representative_works": [
+      "《罪与罚》",
+      "《卡拉马佐夫兄弟》"
+    ],
+    "death_year": 1881,
+    "is_public_domain": true
+  },
+  {
+    "name": "安东·契诃夫",
+    "region": "俄罗斯",
+    "style": "短篇小说之王。以简洁、含蓄的笔触描绘俄国小人物的日常生活，善于在悲剧中融入幽默，追求言有尽而意无穷的艺术境界。",
+    "representative_works": [
+      "《套中人》",
+      "《樱桃园》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "亚历山大·普希金",
+    "region": "俄罗斯",
+    "style": "俄罗斯文学之父。诗歌与小说创作融会贯通，以诗体长篇小说开创了俄国现实主义传统，语言优美而富有人民性。",
+    "representative_works": [
+      "《叶甫盖尼·奥涅金》",
+      "《上尉的女儿》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "伊万·屠格涅夫",
+    "region": "俄罗斯",
+    "style": "俄国现实主义文学巨匠。以优美的风景描写和细腻的心理刻画著称，笔下常塑造出具有时代感的“多余人”形象。",
+    "representative_works": [
+      "《父与子》",
+      "《猎人笔记》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "尼古莱·果戈理",
+    "region": "俄罗斯",
+    "style": "俄国批判现实主义奠基人。以讽刺与怪诞的笔触揭露社会腐朽，将小人物的悲剧与荒诞融为一体。",
+    "representative_works": [
+      "《死魂灵》",
+      "《钦差大臣》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "米哈伊尔·肖洛霍夫",
+    "region": "俄罗斯",
+    "style": "1965年诺贝尔文学奖得主。以史诗般的笔触描绘顿河哥萨克的命运变迁，作品气势磅礴、情感深沉。",
+    "representative_works": [
+      "《静静的顿河》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "鲍里斯·帕斯捷尔纳克",
+    "region": "俄罗斯",
+    "style": "1958年诺贝尔文学奖得主（被拒领）。以诗意的语言和深邃的哲思书写20世纪俄国的动荡历史与知识分子的命运。",
+    "representative_works": [
+      "《日瓦戈医生》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "索尔仁尼琴",
+    "region": "俄罗斯",
+    "style": "1970年诺贝尔文学奖得主。以其亲身经历揭露古拉格群岛的残酷真相，以宏大的叙事对抗极权对历史的篡改。",
+    "representative_works": [
+      "《古拉格群岛》",
+      "《癌病房》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "弗拉基米尔·纳博科夫",
+    "region": "俄罗斯/美国",
+    "style": "文体大师。以华丽繁复的语言、精巧的叙事结构和蝴蝶般精密的文本著称，颠覆传统小说的边界与阅读期待。",
+    "representative_works": [
+      "《洛丽塔》",
+      "《微暗的火》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "欧内斯特·海明威",
+    "region": "美国",
+    "style": "“迷惘的一代”代言人。以著名的“冰山理论”著称，语言简洁有力，情感深沉内敛，塑造了坚毅而孤寂的硬汉形象。",
+    "representative_works": [
+      "《老人与海》",
+      "《永别了，武器》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "威廉·福克纳",
+    "region": "美国",
+    "style": "1949年诺贝尔文学奖得主。意识流文学大师，构建了约克纳帕塔法县神话王国，以迷宫般的时间结构和多重视角探索美国南方的历史与家族衰败。",
+    "representative_works": [
+      "《喧哗与骚动》",
+      "《我弥留之际》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "F·斯科特·菲茨杰拉德",
+    "region": "美国",
+    "style": "“爵士时代”的桂冠诗人。以华丽忧伤的笔触描绘美国梦的绚丽与幻灭，作品充满了对财富、阶级与爱情的细腻描摹。",
+    "representative_works": [
+      "《了不起的盖茨比》",
+      "《夜色温柔》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "赫尔曼·梅尔维尔",
+    "region": "美国",
+    "style": "美国文学的莎士比亚。以宏大的哲学叙事和象征主义手法探讨善与恶、人与自然的关系，文风厚重而充满宗教隐喻。",
+    "representative_works": [
+      "《白鲸》",
+      "《阳台》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "马克·吐温",
+    "region": "美国",
+    "style": "美国幽默文学大师。以诙谐幽默的笔调和鲜明的方言土语，辛辣地讽刺了社会的虚伪与不公，开创了独特的美国叙事风格。",
+    "representative_works": [
+      "《哈克贝利·费恩历险记》",
+      "《汤姆·索亚历险记》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "埃德加·爱伦·坡",
+    "region": "美国",
+    "style": "黑暗浪漫主义之父。以哥特式氛围、心理恐怖和理性推理开创了侦探小说的先河，影响了后世无数作家。",
+    "representative_works": [
+      "《乌鸦》",
+      "《莫格街凶杀案》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "纳撒尼尔·霍桑",
+    "region": "美国",
+    "style": "象征主义小说大师。以新英格兰清教历史为背景，探讨罪恶、赎罪与人性的幽暗面，文字凝重而富有寓言性。",
+    "representative_works": [
+      "《红字》",
+      "《七角楼房》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "弗拉基米尔·纳博科夫",
+    "region": "俄罗斯/美国",
+    "style": "跨文化的文体大师。以华丽繁复的语言、精巧的叙事结构和蝴蝶般精密的文本著称，颠覆传统小说的边界与阅读期待。",
+    "representative_works": [
+      "《洛丽塔》",
+      "《微暗的火》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "JD·塞林格",
+    "region": "美国",
+    "style": "遁世传奇作家。以犀利幽默的青少年视角批判成人世界的虚伪，作品影响了一代美国青年的精神成长。",
+    "representative_works": [
+      "《麦田里的守望者》",
+      "《九故事》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "雷蒙德·卡佛",
+    "region": "美国",
+    "style": "极简主义文学大师。以“脏现实主义”风格书写美国底层蓝领的日常生活，用词简练，情感克制却蕴含巨大的张力。",
+    "representative_works": [
+      "《当我们谈论爱情时我们谈论什么》",
+      "《大教堂》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "托妮·莫里森",
+    "region": "美国",
+    "style": "1993年诺贝尔文学奖得主。以诗意浓厚的语言和魔幻现实主义的笔触，书写美国黑奴制下非洲裔群体的心灵创伤与身份认同。",
+    "representative_works": [
+      "《宠儿》",
+      "《所罗门之歌》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "科马克·麦卡锡",
+    "region": "美国",
+    "style": "黑暗西部史诗的缔造者。以粗粝刚硬的文风和充满哲学思辨的暴力叙事，探讨文明边缘地带的人性极限与善恶边界。",
+    "representative_works": [
+      "《血色子午线》",
+      "《老无所依》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "托马斯·品钦",
+    "region": "美国",
+    "style": "后现代主义文学的代表人物。以百科全书式的庞杂叙事、荒诞幽默和对科技社会偏执症的多重解构，挑战传统小说范式。",
+    "representative_works": [
+      "《万有引力之虹》",
+      "《拍卖第49批》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "唐·德里罗",
+    "region": "美国",
+    "style": "当代美国社会的预言家。以冷峻精准的笔触聚焦技术社会、大众媒体与恐怖主义等主题，作品充满智识密度与时代焦虑。",
+    "representative_works": [
+      "《白噪音》",
+      "《地下世界》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "斯蒂芬·金",
+    "region": "美国",
+    "style": "当代恐怖小说大师。善于将日常生活中的恐惧无限放大，在恐怖外壳下深挖人性善恶，作品通俗且极具社会洞察力。",
+    "representative_works": [
+      "《闪灵》",
+      "《肖申克的救赎》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "加夫列尔·加西亚·马尔克斯",
+    "region": "拉丁美洲",
+    "style": "1982年诺贝尔文学奖得主。魔幻现实主义文学的代表人物，将拉美的神话传说与现实融为一体，书写了宏伟的布恩迪亚家族史诗。",
+    "representative_works": [
+      "《百年孤独》",
+      "《霍乱时期的爱情》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "豪尔赫·路易斯·博尔赫斯",
+    "region": "拉丁美洲",
+    "style": "作家中的作家。以迷宫、图书馆、镜子等意象构建哲学寓言，将小说的虚构性推向极致，文字精炼，思想深邃。",
+    "representative_works": [
+      "《小径分岔的花园》",
+      "《虚构集》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "马里奥·巴尔加斯·略萨",
+    "region": "拉丁美洲",
+    "style": "2010年诺贝尔文学奖得主。结构现实主义大师，以精湛的叙事技法书写权力、暴力与独裁，作品兼具政治批判与形式探索。",
+    "representative_works": [
+      "《城市与狗》",
+      "《酒吧长谈》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "胡安·鲁尔福",
+    "region": "拉丁美洲",
+    "style": "墨西哥文学之神。以极少的作品赢得不朽声誉，笔下的科马拉村庄阴森诡异，被誉为魔幻现实主义的前驱。",
+    "representative_works": [
+      "《佩德罗·巴拉莫》",
+      "《燃烧的原野》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "胡利奥·科塔萨尔",
+    "region": "拉丁美洲",
+    "style": "拉美文学爆炸的怪才。以游戏中蕴含批判的叙事风格颠覆现实与虚构的界限，短篇小说技艺精湛。",
+    "representative_works": [
+      "《跳房子》",
+      "《动物寓言集》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "卡洛斯·富恩特斯",
+    "region": "拉丁美洲",
+    "style": "墨西哥国宝级作家。以史诗般的叙事重构墨西哥的民族身份与文化记忆，作品结构繁复而充满野心。",
+    "representative_works": [
+      "《阿尔特米奥·克罗斯之死》",
+      "《我们的土地》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "罗贝托·波拉尼奥",
+    "region": "拉丁美洲",
+    "style": "后现代主义大师。以浩瀚的篇幅、碎片化的叙事和文学侦探般的笔调，书写20世纪的文学理想与暴力阴影。",
+    "representative_works": [
+      "《2666》",
+      "《荒野侦探》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "伊莎贝尔·阿连德",
+    "region": "拉丁美洲",
+    "style": "魔幻现实主义女作家。以家族史的视角书写拉美的政治动荡与女性命运，情感炽烈、叙事动人。",
+    "representative_works": [
+      "《幽灵之家》",
+      "《幸运女儿》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "君特·格拉斯",
+    "region": "德国",
+    "style": "1999年诺贝尔文学奖得主。以怪诞、夸张的笔触反思德国纳粹历史，将沉重的二战记忆与黑色幽默交织。",
+    "representative_works": [
+      "《铁皮鼓》",
+      "《猫与鼠》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "托马斯·曼",
+    "region": "德国",
+    "style": "1929年诺贝尔文学奖得主。以宏大的智识叙事探讨德国文化与欧洲文明的病症，作品结构严谨，思想深邃。",
+    "representative_works": [
+      "《魔山》",
+      "《布登勃洛克一家》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "赫尔曼·黑塞",
+    "region": "德国",
+    "style": "1946年诺贝尔文学奖得主。作品关注个体的精神危机与自我探索，融合东方哲学与西方心理学。",
+    "representative_works": [
+      "《荒原狼》",
+      "《悉达多》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "弗兰兹·卡夫卡",
+    "region": "德国",
+    "style": "现代主义文学的先知。以冷峻、荒诞的笔触描绘现代人的异化与孤独，官僚体制的冷酷和个人在庞大系统面前的无力贯穿其作品。",
+    "representative_works": [
+      "《变形记》",
+      "《审判》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "阿尔贝托·莫拉维亚",
+    "region": "意大利",
+    "style": "意大利存在主义小说大师。以冷静、客观的笔触描绘战后意大利中产阶级的精神空虚与性压抑。",
+    "representative_works": [
+      "《冷漠的人》",
+      "《乔恰拉》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "伊塔洛·卡尔维诺",
+    "region": "意大利",
+    "style": "后现代寓言大师。作品充满轻盈的想象力和精巧的结构，以童话寓言包裹对文学与世界的深邃思考。",
+    "representative_works": [
+      "《看不见的城市》",
+      "《分成两半的子爵》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "翁贝托·埃科",
+    "region": "意大利",
+    "style": "符号学小说大师。以中世纪历史为背景，将玄学、侦探、哲学融为一体，小说是智识的盛宴。",
+    "representative_works": [
+      "《玫瑰的名字》",
+      "《傅科摆》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "埃莱娜·费兰特",
+    "region": "意大利",
+    "style": "神秘的天才作家。以毫不留情的笔触书写女性一生中的友谊、嫉妒与成长，剖析那不勒斯的暴力与美丽。",
+    "representative_works": [
+      "《我的天才女友》",
+      "《新名字的故事》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "泰戈尔",
+    "region": "印度",
+    "style": "1913年诺贝尔文学奖得主。东方诗哲，其诗歌与小说融汇了印度传统哲学与对人性解放的追求，语言纯净优美。",
+    "representative_works": [
+      "《吉檀迦利》",
+      "《飞鸟集》"
+    ],
+    "death_year": 1941,
+    "is_public_domain": true
+  },
+  {
+    "name": "普列姆昌德",
+    "region": "印度",
+    "style": "印度现代文学奠基人。以印地语和乌尔都语写作，用批判现实主义笔触反映印度农村的贫困与种姓制度的压迫。",
+    "representative_works": [
+      "《戈丹》",
+      "《舞台》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "萨尔曼·鲁西迪",
+    "region": "印度",
+    "style": "魔幻现实主义的流亡者。以繁复华丽的语言、神话与历史的交织，书写印度次大陆的独立创伤与文化混杂。",
+    "representative_works": [
+      "《午夜的孩子》",
+      "《羞耻》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "V·S·奈保尔",
+    "region": "印度",
+    "style": "2001年诺贝尔文学奖得主。以冷峻、近乎残酷的视角书写后殖民世界的混乱与无根感，是移民文学的代表人物。",
+    "representative_works": [
+      "《毕司沃斯先生的房子》",
+      "《河湾》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "钦努阿·阿契贝",
+    "region": "非洲",
+    "style": "非洲文学之父。以冷静、克制的笔触书写伊博族传统文化与殖民入侵的冲突，戳破了欧洲中心主义的非洲叙事。",
+    "representative_works": [
+      "《瓦解》",
+      "《动荡》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "沃莱·索因卡",
+    "region": "非洲",
+    "style": "1986年诺贝尔文学奖得主。尼日利亚剧作家、诗人，以融合约鲁巴神话与西方戏剧的形式，批判专制与不公。",
+    "representative_works": [
+      "《狮子与宝石》",
+      "《死亡与国王的侍从》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "纳吉布·马哈福兹",
+    "region": "非洲",
+    "style": "1988年诺贝尔文学奖得主。埃及三ALI’liwan叙事大师，以开罗为背景，书写阿拉伯世界的传统与现代转型。",
+    "representative_works": [
+      "《宫间街》",
+      "《思宫街》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "J·M·库切",
+    "region": "南非",
+    "style": "2003年诺贝尔文学奖得主。以冷峻、赤裸的笔触反思殖民主义、种族隔离与人性深渊，写作风格极简但充满哲思。",
+    "representative_works": [
+      "《耻》",
+      "《迈克尔·K的生活和时代》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "纳丁·戈迪默",
+    "region": "南非",
+    "style": "1991年诺贝尔文学奖得主。以南非种族隔离为背景，书写个体在暴力政治下的道德选择与人性困境。",
+    "representative_works": [
+      "《七月的人民》",
+      "《伯格的女儿》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "米歇尔·乌洛贝克",
+    "region": "法国",
+    "style": "当代争议性作家。以挑衅、直白的笔触书写当代社会的异化、孤独与信仰崩塌，被誉为“法国文学的坏孩子”。",
+    "representative_works": [
+      "《基本粒子》",
+      "《血清素》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "埃莱娜·费兰特",
+    "region": "意大利",
+    "style": "神秘的天才作家。以毫不留情的笔触书写女性一生中的友谊、嫉妒与成长，剖析那不勒斯的暴力与美丽。",
+    "representative_works": [
+      "《我的天才女友》",
+      "《新名字的故事》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "唐家三少",
+    "region": "中国",
+    "style": "网文之王。以热血成长、世界观宏大著称，开创“斗罗宇宙”，作品以鲜明的武魂体系与团队羁绊影响一代读者，持续更新创下纪录。",
+    "representative_works": [
+      "《斗罗大陆》系列",
+      "《神印王座》",
+      "《琴帝》",
+      "《生肖守护神》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "我吃西红柿",
+    "region": "中国",
+    "style": "小白文开创者，以浅白流畅的语言构筑宇宙史诗，多书写草根主角从弱到强的修道之路，风格大气纯粹。",
+    "representative_works": [
+      "《星辰变》",
+      "《盘龙》",
+      "《吞噬星空》",
+      "《莽荒纪》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "辰东",
+    "region": "中国",
+    "style": "玄幻悬念流开创者。其笔下诸天万界气势磅礴，时空框架恢弘，文风带有悲壮色彩，善于塑造“狠人”角色与“遮天三部曲”宇宙。",
+    "representative_works": [
+      "《遮天》",
+      "《完美世界》",
+      "《圣墟》",
+      "《神墓》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "天蚕土豆",
+    "region": "中国",
+    "style": "天才退婚流代言人。节奏感极强，善于制造爽点与“燃”点，其“废柴逆袭、莫欺少年穷”的叙事模式影响了整个网文圈。",
+    "representative_works": [
+      "《斗破苍穹》",
+      "《武动乾坤》",
+      "《大主宰》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "梦入神机",
+    "region": "中国",
+    "style": "流派开创大师。多部作品直接开启新流派（洪荒、国术），文风凌厉、杀伐果断，是早期网文界最具影响力的“至高神”之一。",
+    "representative_works": [
+      "《佛本是道》",
+      "《龙蛇演义》",
+      "《阳神》",
+      "《永生》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "猫腻",
+    "region": "中国",
+    "style": "文青文代表。文笔细腻富有哲学思辨，善于构建复杂的权谋与家国情怀，是网络文学中兼具商业性与文学性的典范。",
+    "representative_works": [
+      "《庆余年》",
+      "《将夜》",
+      "《间客》",
+      "《择天记》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "耳根",
+    "region": "中国",
+    "style": "仙侠小说中流砥柱。以《仙逆》奠定仙侠领域地位，善于描写求道之路上主角的挣扎与坚守，风格大气而忧郁。",
+    "representative_works": [
+      "《仙逆》",
+      "《求魔》",
+      "《我欲封天》",
+      "《一念永恒》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "忘语",
+    "region": "中国",
+    "style": "凡人流开山鼻祖。开创了凡人修仙这一流派，以平实的笔触描写韩立谨慎低调、步步为营的修仙路，奠定了凡人流的基调。",
+    "representative_works": [
+      "《凡人修仙传》",
+      "《魔天记》",
+      "《玄界之门》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "烽火戏诸侯",
+    "region": "中国",
+    "style": "总管。文字极具张力与美感，多以浪子、公子哥为主角，风格兼具江湖豪气与庙堂权谋，善写人心与意境。",
+    "representative_works": [
+      "《雪中悍刀行》",
+      "《剑来》",
+      "《陈二狗的妖孽人生》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "爱潜水的乌贼",
+    "region": "中国",
+    "style": "风格多变的大神。每一本书都力求突破，善于构建新颖的世界观与复杂的升级体系，其“克苏鲁+SCP”风格的《诡秘之主》开创了诡秘流。",
+    "representative_works": [
+      "《诡秘之主》",
+      "《奥术神座》",
+      "《长夜余火》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "卖报小郎君",
+    "region": "中国",
+    "style": "仙侠探案流代表。风格轻松幽默，将探案元素与仙侠结合，擅长制造有趣的网文梗与爽快的情节节奏。",
+    "representative_works": [
+      "《大奉打更人》",
+      "《灵境行者》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "会说话的肘子",
+    "region": "中国",
+    "style": "反套路搞笑代表。擅长日常与吐槽风，主角性格鲜明，书中段子与梗层出不穷，深受年轻读者喜爱。",
+    "representative_works": [
+      "《大王饶命》",
+      "《第一序列》",
+      "《夜的命名术》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "宅猪",
+    "region": "中国",
+    "style": "内涵型创作者。作品设定宏大，脑洞清奇，注重提升作品内涵与技法，近年被读者视为“最有希望封神的作者之一”。",
+    "representative_works": [
+      "《牧神记》",
+      "《临渊行》",
+      "《择日飞升》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "老鹰吃小鸡",
+    "region": "中国",
+    "style": "肝帝。以更新快、字数多、爽点密集著称，节奏极快，擅长多主角群像描写，让读者大呼过瘾。",
+    "representative_works": [
+      "《全球高武》",
+      "《万族之劫》",
+      "《星门》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "言归正传",
+    "region": "中国",
+    "style": "稳健流开创者。以“苟道”修仙为特色，故事中充满了严谨的逻辑与细节，风格稳中带皮。",
+    "representative_works": [
+      "《我师兄实在太稳健了》",
+      "《天庭聊天群》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "狐尾的笔",
+    "region": "中国",
+    "style": "中式克苏鲁流开创者。将东方民俗志怪与克苏鲁式恐怖融合，风格诡异癫狂，主角常处于精神与现实的模糊地带。",
+    "representative_works": [
+      "《道诡异仙》",
+      "《诡秘地海》",
+      "《故障乌托邦》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "三天两觉",
+    "region": "中国",
+    "style": "反套路智斗派。擅长以高智商角色为核心进行布局，文风玩梗无数，风格独特，被读者戏称为“外出取材”的代表。",
+    "representative_works": [
+      "《惊悚乐园》",
+      "《贩罪》",
+      "《纣临》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "滚开",
+    "region": "中国",
+    "style": "极道流代表。风格冷硬，主角杀伐果断、行事极端，擅长将各类超能力、异能进行科学化或者数据化的推演与嵌套。",
+    "representative_works": [
+      "《隐秘死角》",
+      "《极道天魔》",
+      "《永恒剑主》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "纯洁滴小龙",
+    "region": "中国",
+    "style": "悬疑灵异大师。早期以黑暗压抑风格成名，转型后依然保持高水准，善于营造氛围与描写人性在极端环境下的抉择。",
+    "representative_works": [
+      "《深夜书屋》",
+      "《魔临》",
+      "《明克街13号》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "佛前献花",
+    "region": "中国",
+    "style": "中式灵异流派开创者。代表作品以“鬼不可杀死、唯鬼制鬼”的绝望设定重塑本土灵异氛围，风格压抑。",
+    "representative_works": [
+      "《神秘复苏》",
+      "《天倾之后》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "三九音域",
+    "region": "中国",
+    "style": "热血叙事与现实映射派。以大世界观、守护与牺牲的主题为核心，擅长将都市异能与传统神话融合。",
+    "representative_works": [
+      "《我在精神病院学斩神》",
+      "《我不是戏神》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "杀虫队队员",
+    "region": "中国",
+    "style": "番茄新生代顶流。以烧脑的博弈算计与人性救赎为核心，通过高智商的生死游戏构建悬疑世界。",
+    "representative_works": [
+      "《十日终焉》",
+      "《传说管理局》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "澎湃",
+    "region": "中国",
+    "style": "都市异能悬疑派。以高概念的设定和“世界虚假但爱真实”的哲学内核引发读者共鸣，氛围感强。",
+    "representative_works": [
+      "《异兽迷城》",
+      "《逆位迷宫》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "榴弹怕水",
+    "region": "中国",
+    "style": "新晋白金作家。深耕历史题材，善于将民族气节与热血叙事结合，考据严谨但行文酣畅。",
+    "representative_works": [
+      "《绍宋》",
+      "《覆汉》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "王梓钧",
+    "region": "中国",
+    "style": "新晋白金作家，历史题材创作者。凭借严谨的考据与生动的描写再现历史风华，被读者誉为“行走的百科全书”。",
+    "representative_works": [
+      "《北宋穿越指南》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "阎ZK",
+    "region": "中国",
+    "style": "95后新生代白金作家。以“横渠四句”为精神内核，将江湖、朝堂与民生巧妙融合，传递家国天下的人生理想。",
+    "representative_works": [
+      "《太平令》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "油爆香菇",
+    "region": "中国",
+    "style": "新晋白金女作家。其作品兼具女性视角的细腻与宏大叙事，以独特构思突破常规题材框架。",
+    "representative_works": [
+      "《大佬退休之后》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "最白的乌鸦",
+    "region": "中国",
+    "style": "95后新晋白金作家。凭借反套路的修仙喜剧风格，成为近年来上升速度最快的网文作者之一。",
+    "representative_works": [
+      "《谁让他修仙的！》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "孤独麦客",
+    "region": "中国",
+    "style": "新晋大神作家。以厚重的笔触书写乱世众生，注重史实与人性的深刻挖掘，充满温情的人文关怀。",
+    "representative_works": [
+      "《晋末长剑》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "城城与蝉",
+    "region": "中国",
+    "style": "新晋大神作家。凭借处女作一书封神，其科幻构思精巧，斩获科幻银河奖桂冠，潜力巨大。",
+    "representative_works": [
+      "《天才俱乐部》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "董无渊",
+    "region": "中国",
+    "style": "90后新晋大神作家。专注于将中华传统技艺融入现代叙事，文笔细腻，文化底蕴深厚。",
+    "representative_works": [
+      "《墨燃丹青》",
+      "《一纸千金》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "非10",
+    "region": "中国",
+    "style": "新晋大神作家。擅长将现代叙事与传统技艺相结合，其作品《长安好》以生动笔触重现大唐风华与文化自信。",
+    "representative_works": [
+      "《长安好》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "沙拉古斯",
+    "region": "中国",
+    "style": "十二天王，风格杂糅。擅长将蒸汽朋克、民俗志怪与独特道门结合，构建光怪陆离的幻想世界。",
+    "representative_works": [
+      "《普罗之主》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "生吃菌子",
+    "region": "中国",
+    "style": "十二天王，反套路轻小说流。以独特的视角切入传统奇幻，风格清奇，叙事充满趣味性。",
+    "representative_works": [
+      "《这个地下城长蘑菇了》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "汐尺",
+    "region": "中国",
+    "style": "00后十二天王。擅长将超凡战斗、角色扮演与悬疑解谜相结合，展现出超越年龄的叙事掌控力。",
+    "representative_works": [
+      "《我的化身正在成为最终BOSS》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "雪梨炖茶",
+    "region": "中国",
+    "style": "十二天王。擅长编织时间循环、悬疑解谜与青春恋爱等多层叙事，文本结构精巧。",
+    "representative_works": [
+      "《冬日重现》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "血红",
+    "region": "中国",
+    "style": "远古网文之神。以宏大的世界观和庞大的数据量著称，文笔老辣，杀伐果断，是早期网文界的代表性大神。",
+    "representative_works": [
+      "《升龙道》",
+      "《邪风曲》",
+      "《巫颂》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "月关",
+    "region": "中国",
+    "style": "架空历史领域的代表作家。文风细腻，善于描写官场、权谋与风土人情，作品改编众多。",
+    "representative_works": [
+      "《回到明朝当王爷》",
+      "《步步生莲》",
+      "《锦衣夜行》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "愤怒的香蕉",
+    "region": "中国",
+    "style": "文青文代表，被誉为“蕉姐”。注重文笔与人物内心刻画，行文节奏舒缓，以细腻情感见长。",
+    "representative_works": [
+      "《赘婿》",
+      "《隐杀》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "烟雨江南",
+    "region": "中国",
+    "style": "早期玄幻大神。文笔华丽，风格多变，擅长史诗级叙事与复杂的力量体系构建。",
+    "representative_works": [
+      "《亵渎》",
+      "《永夜君王》",
+      "《罪恶之城》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "跳舞",
+    "region": "中国",
+    "style": "都市与奇幻早期大神。以幽默调侃的文风、流畅的剧情和鲜明的人物形象在网文黄金时代影响巨大。",
+    "representative_works": [
+      "《恶魔法则》",
+      "《邪气凛然》",
+      "《天王》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "无罪",
+    "region": "中国",
+    "style": "竞技与仙侠大神，电子竞技小说早期代表人物。文风热血，节奏明快。",
+    "representative_works": [
+      "《流氓高手》",
+      "《仙魔变》",
+      "《剑王朝》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "萧鼎",
+    "region": "中国",
+    "style": "古典仙侠巨匠。一部《诛仙》开创了仙侠小说的悲剧审美与爱情描写的先河，影响深远。",
+    "representative_works": [
+      "《诛仙》",
+      "《暗黑之路》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "树下野狐",
+    "region": "中国",
+    "style": "新神话主义代表，创造了宏大的“蛮荒”三部曲体系，风格瑰丽磅礴。",
+    "representative_works": [
+      "《搜神记》",
+      "《蛮荒记》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "流浪的蛤蟆",
+    "region": "中国",
+    "style": "远古大神，想象力天马行空，善于驾驭多种题材，是网文界资深的探索者。",
+    "representative_works": [
+      "《蜀山》",
+      "《仙葫》",
+      "《一剑飞仙》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "打眼",
+    "region": "中国",
+    "style": "都市鉴宝类作品的集大成者。知识性、趣味性结合极好，开创了都市异能鉴宝这一门类。",
+    "representative_works": [
+      "《黄金瞳》",
+      "《天才相师》",
+      "《宝鉴》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "骁骑校",
+    "region": "中国",
+    "style": "现实题材与近代史创作者。作品充满了对底层民众的关怀，文风扎实，历史感厚重。",
+    "representative_works": [
+      "《橙红年代》",
+      "《匹夫的逆袭》",
+      "《国士无双》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "风凌天下",
+    "region": "中国",
+    "style": "爽文流代言人。行文酣畅淋漓，主角多带有“重情重义、杀伐果断”的风格，节奏爽快。",
+    "representative_works": [
+      "《傲世九重天》",
+      "《异世邪君》",
+      "《天域苍穹》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "孑与2",
+    "region": "中国",
+    "style": "历史生活流开创者。文风平实幽默，不重权谋而重生活日常，将唐人的生活细节展现得淋漓尽致。",
+    "representative_works": [
+      "《唐砖》",
+      "《大宋的智慧》",
+      "《银狐》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "方想",
+    "region": "中国",
+    "style": "设定流大神。创造了许多新颖的修炼体系和职业设定，以紧凑的节奏和铁血风格著称。",
+    "representative_works": [
+      "《卡徒》",
+      "《师士传说》",
+      "《修真世界》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "横扫天涯",
+    "region": "中国",
+    "style": "“一书封神”的代表。其代表作融合了教学与升级元素，风格轻松幽默，设定新奇。",
+    "representative_works": [
+      "《天道图书馆》",
+      "《造化图》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "远瞳",
+    "region": "中国",
+    "style": "科幻谐教流。将硬核科幻与日常欢乐吐槽结合，创造出独特的“大眼珠子”风格，充满了脑洞与逻辑。",
+    "representative_works": [
+      "《希灵帝国》",
+      "《异常生物见闻录》",
+      "《深海余烬》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "Cuslaa / 哥斯拉",
+    "region": "中国",
+    "style": "工业救国流代表。以宏大的工业化叙事改造玄幻世界，风格硬核，逻辑严密。",
+    "representative_works": [
+      "《宰执天下》",
+      "《秦吏》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "校花",
+    "region": "中国",
+    "style": "专注末世热血题材，其笔下废土世界刻画入木三分，主角多在末世中经历残酷蜕变，杀伐果断且胸怀大义。",
+    "representative_works": [
+      "《第九特区》",
+      "《归向》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "顾漫",
+    "region": "中国",
+    "style": "现代言情女王。文风轻松甜美，故事纯真浪漫，其作品“乌龟漫”的更新虽慢但品质极高。",
+    "representative_works": [
+      "《何以笙箫默》",
+      "《微微一笑很倾城》",
+      "《杉杉来吃》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "Priest",
+    "region": "中国",
+    "style": "思想性与文笔俱佳，作品题材多变，善于刻画主角间深刻的羁绊与互动，格局宏大。",
+    "representative_works": [
+      "《有匪》",
+      "《默读》",
+      "《镇魂》",
+      "《杀破狼》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "墨香铜臭",
+    "region": "中国",
+    "style": "现象级晋江作家。故事结构精巧，情感浓烈，将传统仙侠与耽美题材完美结合。",
+    "representative_works": [
+      "《魔道祖师》",
+      "《天官赐福》",
+      "《人渣反派自救系统》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "关心则乱",
+    "region": "中国",
+    "style": "种田文代表。文风朴实，擅长写家族内宅生活与女性成长智慧，细节丰富。",
+    "representative_works": [
+      "《知否？知否？应是绿肥红瘦》",
+      "《星汉灿烂，幸甚至哉》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "尾鱼",
+    "region": "中国",
+    "style": "奇情探险作家。将现代都市与古老神话、民俗探险结合，风格独特，想象力奇诡。",
+    "representative_works": [
+      "《怨气撞铃》",
+      "《七根凶简》",
+      "《西出玉门》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "蝴蝶蓝",
+    "region": "中国",
+    "style": "电竞题材第一人。以幽默风趣的笔触、群像式的角色塑造和对游戏的热爱而闻名。",
+    "representative_works": [
+      "《全职高手》",
+      "《近战法师》",
+      "《网游之近战法师》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "南派三叔",
+    "region": "中国",
+    "style": "探险悬疑之王。以其天马行空的想象力创造了庞大的“盗墓”体系，人物形象深入人心。",
+    "representative_works": [
+      "《盗墓笔记》系列",
+      "《沙海》",
+      "《藏海花》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "天下霸唱",
+    "region": "中国",
+    "style": "盗墓小说鼻祖。将中国民间传说、风水文化融入惊险刺激的冒险中，想象瑰丽，文风独特。",
+    "representative_works": [
+      "《鬼吹灯》系列",
+      "《谜踪之国》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "今何在",
+    "region": "中国",
+    "style": "网络文学启蒙者。作品充满了对宿命的反抗与诗意化的反叛，影响了后来无数创作者。",
+    "representative_works": [
+      "《悟空传》",
+      "《九州·羽传说》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "江南",
+    "region": "中国",
+    "style": "青春幻想代表。文笔华丽唯美，以独特的情感描写和悲壮的结局著称，其作品充满诗意。",
+    "representative_works": [
+      "《龙族》",
+      "《九州缥缈录》",
+      "《此间的少年》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "凤歌",
+    "region": "中国",
+    "style": "大陆新武侠代表。将传统武侠与现代叙事结合，注重故事的悬疑性与科幻色彩的融合。",
+    "representative_works": [
+      "《昆仑》",
+      "《沧海》",
+      "《灵飞经》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  },
+  {
+    "name": "时晨",
+    "region": "中国",
+    "style": "当代华语推理中坚力量，其作品逻辑严谨、设定新颖，多部作品融合高智商博弈与民俗悬疑，极具张力。",
+    "representative_works": [
+      "《黑曜馆事件》",
+      "《傀儡村事件》",
+      "《五行塔事件》"
+    ],
+    "death_year": null,
+    "is_public_domain": false
+  }
+]

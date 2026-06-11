@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生成结果 — 选墨集 / Sifted-Ink</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">✦ 选墨集 <span style="font-size:0.5em;opacity:0.6;">Sifted-Ink</span></div>
+            <p class="subtitle">生成完成 · 最佳版本: #{{ result.winning_version_id }}</p>
+        </header>
+
+        <!-- Story naming -->
+        {% if story_name %}
+        <div class="card" style="text-align:center;">
+            <div style="font-size:1.8rem;font-weight:700;color:var(--gold);margin-bottom:0.5rem;">
+                《{{ story_name }}》
+            </div>
+            {% if story_meta.get("plot_summary") %}
+            <p style="color:var(--text-secondary);font-size:0.9rem;line-height:1.7;max-width:600px;margin:0 auto;">
+                {{ story_meta.plot_summary }}
+            </p>
+            {% endif %}
+            {% if story_meta.get("candidate_names") %}
+            <div style="margin-top:1rem;display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;">
+                {% for name in story_meta.candidate_names[:10] %}
+                <span style="padding:0.25rem 0.7rem;background:var(--bg-tertiary);border-radius:20px;font-size:0.8rem;
+                    {% if name == story_name %}border:1px solid var(--gold);color:var(--gold);{% endif %}">
+                    {{ name }}
+                </span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% if story_meta.get("best_name_reason") %}
+            <p style="color:var(--text-muted);font-size:0.75rem;margin-top:0.75rem;">
+                💡 {{ story_meta.best_name_reason }}
+            </p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Summary stats -->
+        <div class="card" style="display:flex;justify-content:space-around;text-align:center;flex-wrap:wrap;gap:1rem;">
+            <div>
+                <div style="font-size:2rem;font-weight:700;color:var(--accent);">{{ result.time_elapsed_seconds | round(1) }}s</div>
+                <div style="font-size:0.8rem;color:var(--text-muted);">总耗时</div>
+            </div>
+            <div>
+                <div style="font-size:2rem;font-weight:700;color:var(--green);">{{ result.total_tokens_used }}</div>
+                <div style="font-size:0.8rem;color:var(--text-muted);">Token 消耗</div>
+            </div>
+            <div>
+                <div style="font-size:2rem;font-weight:700;color:var(--purple);">{{ result.versions | length }}</div>
+                <div style="font-size:0.8rem;color:var(--text-muted);">预演版本</div>
+            </div>
+            <div>
+                {% set winner = result.versions | selectattr('version_id', 'equalto', result.winning_version_id) | list %}
+                <div style="font-size:2rem;font-weight:700;color:var(--gold);">{{ winner[0].total_words if winner else '—' }}</div>
+                <div style="font-size:0.8rem;color:var(--text-muted);">总字数</div>
+            </div>
+        </div>
+
+        <!-- Version comparison -->
+        <div class="card">
+            <div class="card-header">
+                <span class="icon">📊</span>
+                <h3>版本对比</h3>
+            </div>
+            <table class="eval-table">
+                <thead>
+                    <tr>
+                        <th>版本</th>
+                        <th>章节</th>
+                        <th>字数</th>
+                        <th>戏剧张力</th>
+                        <th>角色成长</th>
+                        <th>逻辑一致性</th>
+                        <th>结局匹配</th>
+                        <th>总分</th>
+                        <th>状态</th>
+                        <th>下载</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in result.versions %}
+                    {% set ev = result.evaluations | selectattr('version_id', 'equalto', v.version_id) | list %}
+                    {% set e = ev[0] if ev else None %}
+                    <tr>
+                        <td>
+                            <strong>#{{ v.version_id }}</strong>
+                            {% if v.version_id == result.winning_version_id %}
+                            <span style="color:var(--gold);">🏆</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ v.chapter_count }}</td>
+                        <td>{{ v.total_words }}</td>
+                        <td>
+                            {% if e and e.is_complete %}
+                            <span class="score-bar" style="width:{{ (e.dramatic_tension * 8) | int }}px;"></span>
+                            {{ e.dramatic_tension | round(1) }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if e and e.is_complete %}
+                            <span class="score-bar" style="width:{{ (e.character_growth * 8) | int }}px;"></span>
+                            {{ e.character_growth | round(1) }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if e and e.is_complete %}
+                            <span class="score-bar" style="width:{{ (e.logic_consistency * 8) | int }}px;"></span>
+                            {{ e.logic_consistency | round(1) }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if e and e.is_complete %}
+                            <span class="score-bar" style="width:{{ (e.ending_alignment * 8) | int }}px;"></span>
+                            {{ e.ending_alignment | round(1) }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            <strong>{{ e.total_score | round(1) if e else '—' }}</strong>
+                        </td>
+                        <td>
+                            {% if v.reached_ending %}
+                            <span class="status-badge status-done">✅ 完成</span>
+                            {% elif v.terminated_early %}
+                            <span class="status-badge status-error" title="{{ v.termination_reason }}">⚠ 未完成</span>
+                            {% else %}
+                            <span class="status-badge status-running">🔄 运行中</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if v.reached_ending %}
+                            <a href="/download/{{ run_id }}/md/{{ v.version_id }}" class="btn btn-outline" style="padding:0.25rem 0.6rem;font-size:0.75rem;" download>📥 MD</a>
+                            {% else %}
+                            <span style="color:var(--text-muted);font-size:0.75rem;">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tabs for novel preview & eval -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('novel')">📖 小说预览</div>
+            <div class="tab" onclick="switchTab('eval')">📋 评估数据</div>
+        </div>
+
+        <!-- Novel content -->
+        <div id="tab-novel" class="novel-preview">
+            {{ novel_text | safe }}
+        </div>
+
+        <!-- Eval JSON -->
+        <div id="tab-eval" style="display:none;">
+            <div class="card">
+                <pre style="white-space:pre-wrap;font-family:var(--font-mono);font-size:0.8rem;max-height:60vh;overflow-y:auto;">{{ eval_log | tojson(indent=2) }}</pre>
+            </div>
+        </div>
+
+        <!-- Downloads -->
+        <div class="card" style="margin-top:2rem;">
+            <div class="card-header">
+                <span class="icon">📥</span>
+                <h3>下载小说</h3>
+            </div>
+            <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1rem;">
+                选择格式下载。首次下载某格式时会自动生成，稍等片刻。
+            </p>
+            <div style="display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;">
+                <a href="/download/{{ run_id }}/md" class="btn btn-primary" download>📝 Markdown</a>
+                <a href="/download/{{ run_id }}/txt" class="btn btn-outline" download>📄 纯文本</a>
+                <a href="/download/{{ run_id }}/epub" class="btn btn-outline" download>📖 EPUB</a>
+                <a href="/download/{{ run_id }}/pdf" class="btn btn-outline" download>📕 PDF</a>
+                <a href="/download/{{ run_id }}/mobi" class="btn btn-outline" download>📱 Kindle</a>
+            </div>
+        </div>
+
+        <div style="text-align:center;margin-top:1.5rem;display:flex;gap:0.8rem;justify-content:center;flex-wrap:wrap;">
+            <a href="/download/{{ run_id }}/eval" class="btn btn-outline" download>
+                📊 评估日志 (JSON)
+            </a>
+            <a href="/" class="btn btn-outline">
+                🔄 生成新故事
+            </a>
+        </div>
+
+        <footer>选墨集 / Sifted-Ink v1.0 · Author: Maverick-Noob / 布河狸</footer>
+    </div>
+
+    <script>
+    function switchTab(name) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-novel').style.display = name === 'novel' ? 'block' : 'none';
+        document.getElementById('tab-eval').style.display = name === 'eval' ? 'block' : 'none';
+        document.querySelector(`.tab:${name === 'novel' ? 'first' : 'last'}-child`).classList.add('active');
+        // Fix: activate correct tab
+        document.querySelectorAll('.tab')[name === 'novel' ? 0 : 1].classList.add('active');
+    }
+    </script>
+</body>
+</html>

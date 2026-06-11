@@ -1,0 +1,16 @@
+# Core
+pyyaml>=6.0
+json5>=0.9
+fastapi>=0.110
+uvicorn>=0.29
+jinja2>=3.1
+python-multipart>=0.0.9
+
+# Multi-format export
+ebooklib>=0.18
+fpdf2>=2.7
+
+# API SDKs (install at least one)
+anthropic>=0.30
+openai>=1.30
+google-generativeai>=0.6

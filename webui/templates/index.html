@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>选墨集 / Sifted-Ink — 多 Agent 故事生成器</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">✦ 选墨集 <span style="font-size:0.5em;opacity:0.6;">Sifted-Ink</span></div>
+            <p class="subtitle">多 Agent 协同预演 · AI 驱动的小说生成引擎</p>
+        </header>
+
+        <form id="config-form">
+            <div class="form-grid">
+
+            <!-- ── 主角信息 ── -->
+            <div class="card card-half" style="display:flex;flex-direction:column;">
+                <div class="card-header">
+                    <span class="icon">👤</span>
+                    <h3>主角设定</h3>
+                </div>
+                <div id="protagonist-rows" style="flex:1;overflow-y:auto;">
+                    <!-- Row 0: main protagonist (always shown) -->
+                    <div class="proto-row" style="padding:0.5rem 0;border-bottom:1px solid var(--border);">
+                        <div class="form-group"><label>姓名</label><input type="text" name="protagonist_name_0" value="林远" required></div>
+                        <div class="form-group"><label>性格、动机、能力</label><textarea name="protagonist_traits_0" rows="2" required>勇敢但冲动，今年20岁，渴望为家族复仇。擅长剑术，具备初级火系魔法能力。</textarea></div>
+                        <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;gap:0.5rem;">
+                            <input type="text" name="protagonist_role_0" placeholder="团队角色（如：队长、智囊、战士）">
+                            <input type="text" name="protagonist_abilities_0" placeholder="能力/技能">
+                            <input type="number" name="protagonist_intro_0" placeholder="登场章（0=AI决定）" value="0" min="0">
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-outline" onclick="addProtagonistRow()" style="font-size:0.8rem;margin-top:0.5rem;">➕ 添加主角</button>
+            </div>
+
+            <!-- ── 世界背景 ── -->
+            <div class="card card-half" style="display:flex;flex-direction:column;">
+                <div class="card-header">
+                    <span class="icon">🌍</span>
+                    <h3>世界背景</h3>
+                </div>
+                <div class="form-group" style="flex:1;display:flex;flex-direction:column;">
+                    <label>时代、规则、魔法/科技水平</label>
+                    <textarea name="world_setting" required style="flex:1;min-height:120px;">架空奇幻世界"苍澜大陆"，中世纪文明水平。存在四元素魔法体系（火、水、风、土），人类与精灵、矮人共存。魔法公会与武者行会互相制衡。</textarea>
+                </div>
+            </div>
+
+            <!-- ── 故事开头 / 结尾 ── -->
+            <div class="card card-span" style="display:flex;flex-direction:column;">
+                <div class="card-header">
+                    <span class="icon">📖</span>
+                    <h3>故事框架</h3>
+                </div>
+                <div style="display:flex;gap:1rem;flex:1;">
+                    <div class="form-group" style="flex:1;display:flex;flex-direction:column;">
+                        <label>故事开头（初始场景或事件）</label>
+                        <textarea name="story_start" required style="flex:1;min-height:100px;">深夜，林远在家族废墟中挖掘父亲遗物时，发现了一块刻有火焰纹章的石板。石板上浮现出发光的文字："炎之心，藏于龙眠谷。"就在这时，外面传来了脚步声——有人正在接近。</textarea>
+                    </div>
+                    <div class="form-group" style="flex:1;display:flex;flex-direction:column;">
+                        <label>故事结尾 <span class="hint">（可选，留空则由 AI 自动设计结局）</span></label>
+                        <textarea name="story_end" placeholder="留空则 AI 自动生成一个有戏剧性的结局" style="flex:1;min-height:100px;">林远找到炎之心，击败幕后黑手（王国宰相莫里斯），成为新一代火焰守护者，为家族洗清冤屈。</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── 生成参数 ── -->
+            <div class="card card-wide">
+                <div class="card-header">
+                    <span class="icon">⚙️</span>
+                    <h3>生成参数</h3>
+                </div>
+                <div class="form-row" style="grid-template-columns:repeat(6,1fr);">
+                    <div class="form-group"><label>目标字数</label><input type="number" name="target_word_count" value="8000" min="500"></div>
+                    <div class="form-group"><label>并行版本</label><input type="number" name="num_versions" value="3" min="1" max="500"></div>
+                    <div class="form-group"><label>章节上限</label><input type="number" name="max_chapters" value="30" min="5" max="100"></div>
+                    <div class="form-group"><label>NPC 上限</label><input type="number" name="max_npcs" value="30" min="1" max="50"></div>
+                    <div class="form-group"><label>Token 预算</label><input type="number" name="total_token_budget" value="0" min="0"><span class="hint">0=不限</span></div>
+                    <div class="form-group"><label>质量模式</label><select name="quality_mode"><option value="balanced">平衡</option><option value="quality">质量优先</option></select></div>
+                </div>
+                <div class="form-row" style="grid-template-columns:repeat(6,1fr);">
+                    <div class="form-group"><label>主角团模式</label><select name="protagonist_mode" id="protagonist-mode-select"><option value="spotlight">聚光灯</option><option value="team">团队</option><option value="parallel">并行</option></select></div>
+                    <div class="form-group"><label>NPC 策略</label><select name="npc_mode"><option value="parallel">并行</option><option value="scene_filter">过滤</option><option value="narrator">代劳</option></select></div>
+                    <div class="form-group"><label>书名风格</label><select name="naming_style"><option value="">自动</option><option value="直白陈述型">直白</option><option value="诗意意境型">诗意</option><option value="悬念钩子型">悬念</option><option value="人物标签型">人物</option><option value="物件意象型">物件</option><option value="时间/地点锚定型">时空</option><option value="对话/金句型">金句</option></select></div>
+                    <div class="form-group"><label>NPC 名字</label><select name="npc_name_style"><option value="default">默认</option><option value="chinese">中文</option><option value="japanese">日文</option><option value="western">西方</option><option value="russian">俄式</option><option value="mixed">混合</option></select></div>
+                    <div class="form-group"><label>主角人数</label><input type="number" name="protagonist_count" id="protagonist-count-field" value="1" min="1" max="10" readonly style="opacity:0.7;"></div>
+                </div>
+            </div>
+
+            <!-- ── 指定NPC ── -->
+            <div class="card card-half">
+                <div class="card-header">
+                    <span class="icon">👥</span>
+                    <h3>指定 NPC <span style="font-weight:400;font-size:0.8rem;color:var(--text-muted);">（可选）</span></h3>
+                </div>
+                <div id="npc-list"></div>
+                <button type="button" class="btn btn-outline" onclick="addNpcRow()" style="font-size:0.8rem;margin-top:0.5rem;">➕ 添加 NPC</button>
+            </div>
+
+            <!-- ── 写作风格 ── -->
+            <div class="card card-half">
+                <div class="card-header">
+                    <span class="icon">🖋️</span>
+                    <h3>写作风格 <span style="font-weight:400;font-size:0.8rem;color:var(--text-muted);">（可选）</span></h3>
+                </div>
+                <div class="form-group">
+                    <label>搜索作家</label>
+                    <input type="text" id="style-search" placeholder="输入作家名或关键词筛选…" oninput="filterStyles()" autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>选择风格</label>
+                        <select name="writing_style" id="style-select" onchange="onStyleChange()" size="6" style="height:auto;">
+                            <option value="">默认风格（不模仿特定作家）</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="style-preview" style="display:none;">
+                        <label>风格预览</label>
+                        <div id="style-desc" style="font-size:0.85rem;color:var(--text-secondary);padding:0.5rem;background:var(--bg-primary);border-radius:var(--radius-sm);min-height:2.5rem;"></div>
+                    </div>
+                </div>
+                <details style="margin-top:0.5rem;">
+                    <summary style="cursor:pointer;color:var(--text-secondary);font-size:0.85rem;">+ 添加自定义风格</summary>
+                    <div style="margin-top:0.75rem;padding:0.75rem;background:var(--bg-primary);border-radius:var(--radius-sm);">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>作家名</label>
+                                <input type="text" id="custom-name" placeholder="如：我自己的风格">
+                            </div>
+                            <div class="form-group">
+                                <label>地区</label>
+                                <input type="text" id="custom-region" value="自定义" placeholder="中国/日本/…">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>风格描述</label>
+                            <textarea id="custom-style" rows="2" placeholder="描述此风格的写作特点…"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>代表作（逗号分隔）</label>
+                            <input type="text" id="custom-works" placeholder="《作品A》, 《作品B》">
+                        </div>
+                        <button type="button" class="btn btn-outline" onclick="addCustomStyle()" style="font-size:0.8rem;">➕ 添加到列表</button>
+                        <span id="custom-msg" style="font-size:0.75rem;color:var(--green);margin-left:0.5rem;display:none;"></span>
+                    </div>
+                </details>
+            </div>
+
+            <!-- ── 前附文 ── -->
+            <div class="card card-thin">
+                <div class="card-header">
+                    <span class="icon">📖</span>
+                    <h3>前附文 <span style="font-weight:400;font-size:0.8rem;color:var(--text-muted);">（可选）</span></h3>
+                </div>
+                <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+                    <label style="cursor:pointer;font-size:0.85rem;color:var(--text-secondary);"><input type="checkbox" name="front_matter" value="toc"> 目录</label>
+                    <label style="cursor:pointer;font-size:0.85rem;color:var(--text-secondary);"><input type="checkbox" name="front_matter" value="epigraph"> 引言</label>
+                    <label style="cursor:pointer;font-size:0.85rem;color:var(--text-secondary);"><input type="checkbox" name="front_matter" value="prologue"> 楔子</label>
+                    <label style="cursor:pointer;font-size:0.85rem;color:var(--text-secondary);"><input type="checkbox" name="front_matter" value="characters"> 人物表</label>
+                </div>
+            </div>
+
+            <!-- ── API 设置 ── -->
+            <div class="card card-span">
+                <div class="card-header">
+                    <span class="icon">🔑</span>
+                    <h3>API 设置</h3>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>模型供应商</label>
+                        <select name="api_provider" id="api-provider" onchange="onProviderChange()">
+                            <optgroup label="国际">
+                                <option value="anthropic">Anthropic (Claude)</option>
+                                <option value="openai">OpenAI (GPT-4/GPT-4o)</option>
+                                <option value="google">Google (Gemini)</option>
+                                <option value="grok">xAI (Grok)</option>
+                                <option value="mistral">Mistral AI</option>
+                                <option value="cohere">Cohere</option>
+                            </optgroup>
+                            <optgroup label="国内">
+                                <option value="deepseek">DeepSeek</option>
+                                <option value="moonshot">Moonshot (Kimi)</option>
+                                <option value="zhipu">智谱 AI (GLM)</option>
+                                <option value="qwen">阿里通义千问 (Qwen)</option>
+                                <option value="baichuan">百川 (Baichuan)</option>
+                                <option value="minimax">MiniMax</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>模型</label>
+                        <input type="text" name="model" id="model-input" value="claude-sonnet-4-6">
+                        <span class="hint" id="model-hint"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>API Key <span class="hint" id="key-hint">填写或设置环境变量 ANTHROPIC_API_KEY / SIFTED_INK_API_KEY（留空则自动读取）</span></label>
+                    <input type="password" name="api_key" id="api-key-input" placeholder="留空则从环境变量自动读取">
+                </div>
+            </div>
+
+            </div><!-- /form-grid -->
+
+            <!-- ── Submit ── -->
+            <div id="form-error" class="alert alert-error" style="display:none;"></div>
+            <button type="submit" class="btn btn-primary btn-lg" style="width:100%;text-align:center;justify-content:center;margin-top:0.5rem;" id="submit-btn">
+                🚀 开始生成小说
+            </button>
+            <p style="text-align:center;color:var(--text-muted);margin-top:0.75rem;font-size:0.8rem;">
+                注意：生成过程将消耗 API token，请确保 API Key 有效且有足够额度
+            </p>
+        </form>
+
+        <footer>
+            选墨集 / Sifted-Ink v1.0 · Author: Maverick-Noob / 布河狸
+        </footer>
+    </div>
+
+    <script>
+    // Provider → default model & env var hint
+    const PROVIDER_DEFAULTS = {
+        anthropic:  { model: 'claude-sonnet-4-6',   keyEnv: 'ANTHROPIC_API_KEY' },
+        openai:     { model: 'gpt-4o',              keyEnv: 'OPENAI_API_KEY' },
+        google:     { model: 'gemini-2.5-flash',     keyEnv: 'GOOGLE_API_KEY' },
+        deepseek:   { model: 'deepseek-chat',        keyEnv: 'DEEPSEEK_API_KEY' },
+        moonshot:   { model: 'moonshot-v1-8k',       keyEnv: 'MOONSHOT_API_KEY' },
+        zhipu:      { model: 'glm-4-plus',           keyEnv: 'ZHIPU_API_KEY' },
+        qwen:       { model: 'qwen-plus',            keyEnv: 'DASHSCOPE_API_KEY' },
+        baichuan:   { model: 'Baichuan4',            keyEnv: 'BAICHUAN_API_KEY' },
+        minimax:    { model: 'abab6.5s-chat',        keyEnv: 'MINIMAX_API_KEY' },
+        grok:       { model: 'grok-3',               keyEnv: 'XAI_API_KEY' },
+        mistral:    { model: 'mistral-large-latest',  keyEnv: 'MISTRAL_API_KEY' },
+        cohere:     { model: 'command-r-plus',       keyEnv: 'COHERE_API_KEY' },
+    };
+
+    function onProviderChange() {
+        const provider = document.getElementById('api-provider').value;
+        const info = PROVIDER_DEFAULTS[provider];
+        if (!info) return;
+
+        document.getElementById('model-input').value = info.model;
+        document.getElementById('model-hint').textContent = '默认: ' + info.model;
+        document.getElementById('key-hint').textContent =
+            '填写或设置环境变量 ' + info.keyEnv + ' / SIFTED_INK_API_KEY（留空则自动读取）';
+    }
+
+    onProviderChange();
+
+    // ── Writing style dropdown ──────────────────────────────────────
+    let allStyles = [];
+    let customStyles = [];
+
+    async function loadStyles() {
+        try {
+            const resp = await fetch('/api/styles');
+            const data = await resp.json();
+            allStyles = data.writers;
+            customStyles = data.custom || [];
+            renderStyleOptions('');
+        } catch (e) {
+            console.error('Failed to load styles:', e);
+        }
+    }
+
+    function renderStyleOptions(filter) {
+        const select = document.getElementById('style-select');
+        select.innerHTML = '<option value="">默认风格（不模仿特定作家）</option>';
+
+        const filterLower = filter.toLowerCase();
+        const combined = [...customStyles, ...allStyles];  // custom first
+        const filtered = filter
+            ? combined.filter(w =>
+                w.name.toLowerCase().includes(filterLower) ||
+                w.region.toLowerCase().includes(filterLower) ||
+                w.style.toLowerCase().includes(filterLower) ||
+                (w.works || []).some(wk => wk.toLowerCase().includes(filterLower))
+              )
+            : combined;
+
+        // Sort: public domain first, then by region
+        const pdWriters = filtered.filter(w => w.is_public_domain);
+        const otherWriters = filtered.filter(w => !w.is_public_domain);
+
+        if (pdWriters.length > 0) {
+            const pdGroup = document.createElement('optgroup');
+            pdGroup.label = '公版安全 (' + pdWriters.length + '人)';
+            pdGroup.style.color = '#3fb950';
+            for (const w of pdWriters) {
+                const opt = document.createElement('option');
+                opt.value = w.name;
+                opt.textContent = w.name + ' — ' + (w.works[0] || '');
+                pdGroup.appendChild(opt);
+            }
+            select.appendChild(pdGroup);
+        }
+
+        const regions = {};
+        for (const w of otherWriters) {
+            const r = w.region + (customStyles.includes(w) ? ' [自定]' : '');
+            if (!regions[r]) regions[r] = [];
+            regions[r].push(w);
+        }
+        for (const [region, writers] of Object.entries(regions).sort()) {
+            const group = document.createElement('optgroup');
+            group.label = region + ' (' + writers.length + '人)';
+            for (const w of writers) {
+                const opt = document.createElement('option');
+                opt.value = w.name;
+                opt.textContent = w.name + ' — ' + (w.works[0] || '');
+                group.appendChild(opt);
+            }
+            select.appendChild(group);
+        }
+
+        if (filtered.length === 0) {
+            const opt = document.createElement('option');
+            opt.disabled = true;
+            opt.textContent = '无匹配结果';
+            select.appendChild(opt);
+        }
+    }
+
+    function filterStyles() {
+        const q = document.getElementById('style-search').value;
+        renderStyleOptions(q);
+    }
+
+    function onStyleChange() {
+        const name = document.getElementById('style-select').value;
+        if (!name) { document.getElementById('style-preview').style.display = 'none'; return; }
+        const writer = [...customStyles, ...allStyles].find(w => w.name === name);
+        const preview = document.getElementById('style-preview');
+        const desc = document.getElementById('style-desc');
+        if (writer) {
+            preview.style.display = 'block';
+            const legalNote = writer.is_public_domain
+                ? '<div style=\"color:#3fb950;font-size:0.8rem;margin-bottom:0.5rem;\">该作家已故超过50年，作品进入公有领域，可安全使用。</div>'
+                : '<div style=\"color:#d2991d;font-size:0.8rem;margin-bottom:0.5rem;\">该作家可能仍在世或去世不足50年。模仿其风格可能存在法律风险。本工具不保证生成内容与特定作家风格一致，用户对使用生成内容承担全部责任。详见 <a href=\"/terms\" target=\"_blank\">使用条款</a>。</div>';
+            desc.innerHTML = legalNote +
+                '<strong>' + writer.name + '</strong> (' + writer.region + ')' +
+                (writer.death_year ? ' 卒于 ' + writer.death_year : '') + '<br>' +
+                writer.style + '<br><em>代表作: ' + (writer.works || []).join(', ') + '</em>';
+        }
+    }
+
+    async function addCustomStyle() {
+        const name = document.getElementById('custom-name').value.trim();
+        const region = document.getElementById('custom-region').value.trim() || '自定义';
+        const style = document.getElementById('custom-style').value.trim();
+        const works = document.getElementById('custom-works').value.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+
+        if (!name || !style) {
+            document.getElementById('custom-msg').textContent = '请至少填写作家名和风格描述';
+            document.getElementById('custom-msg').style.display = 'inline';
+            return;
+        }
+
+        try {
+            const resp = await fetch('/api/styles/custom', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name, region, style, works})
+            });
+            if (resp.ok) {
+                const data = await resp.json();
+                customStyles = data.custom || [];
+                renderStyleOptions(document.getElementById('style-search').value);
+                document.getElementById('style-select').value = name;
+                onStyleChange();
+                document.getElementById('custom-name').value = '';
+                document.getElementById('custom-style').value = '';
+                document.getElementById('custom-works').value = '';
+                document.getElementById('custom-msg').textContent = '已添加！';
+                document.getElementById('custom-msg').style.display = 'inline';
+                setTimeout(() => { document.getElementById('custom-msg').style.display = 'none'; }, 3000);
+            }
+        } catch (e) {
+            console.error('Failed to add custom style:', e);
+        }
+    }
+
+    loadStyles();
+
+    // ── Multi-protagonist dynamic form ─────────────────────────────
+    let protoCounter = 1;
+    function updateProtagonistCount() {
+        const count = document.querySelectorAll('.proto-row').length;
+        document.getElementById('protagonist-count-field').value = count;
+    }
+    function addProtagonistRow() {
+        protoCounter++;
+        const id = protoCounter;
+        const html = `
+        <div class="proto-row" id="proto-${id}" style="padding:0.5rem 0;border-bottom:1px solid var(--border);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem;">
+                <span style="font-size:0.8rem;color:var(--text-muted);">主角 #${id}</span>
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('proto-${id}').remove();updateProtagonistCount();" style="font-size:0.7rem;padding:0.15rem 0.5rem;">删除</button>
+            </div>
+            <div class="form-group"><label>姓名</label><input type="text" name="protagonist_name_${id}" placeholder="主角姓名"></div>
+            <div class="form-group"><label>性格、动机、能力</label><textarea name="protagonist_traits_${id}" rows="2" placeholder="性格描述、动机、初始能力"></textarea></div>
+            <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;gap:0.3rem;">
+                <div class="form-group"><input type="text" name="protagonist_role_${id}" placeholder="团队角色"></div>
+                <div class="form-group"><input type="text" name="protagonist_abilities_${id}" placeholder="能力/技能"></div>
+                <div class="form-group"><input type="number" name="protagonist_intro_${id}" placeholder="登场章" value="0" min="0"></div>
+            </div>
+        </div>`;
+        document.getElementById('protagonist-rows').insertAdjacentHTML('beforeend', html);
+        updateProtagonistCount();
+    }
+
+    // ── User NPC dynamic form ──────────────────────────────────────
+    let npcCounter = 0;
+    function addNpcRow(name='', role='', personality='', backstory='', relevance='medium', intro='', exit='', abilities='') {
+        npcCounter++;
+        const id = npcCounter;
+        const html = `
+        <div class="npc-row" id="npc-${id}" style="padding:0.5rem 0;border-bottom:1px solid var(--border);">
+            <div class="form-row" style="grid-template-columns:1fr 1fr 1fr 1fr;gap:0.5rem;">
+                <input type="text" name="npc_name_${id}" placeholder="姓名（必填）" value="${name}" style="font-size:0.8rem;">
+                <select name="npc_role_${id}" style="font-size:0.8rem;">
+                    <option value="">关系</option>
+                    <option value="friend" ${role==='friend'?'selected':''}>朋友</option>
+                    <option value="enemy" ${role==='enemy'?'selected':''}>敌人</option>
+                    <option value="mentor" ${role==='mentor'?'selected':''}>导师</option>
+                    <option value="lover" ${role==='lover'?'selected':''}>恋人</option>
+                    <option value="rival" ${role==='rival'?'selected':''}>对手</option>
+                    <option value="neutral" ${role==='neutral'?'selected':''}>中立</option>
+                </select>
+                <select name="npc_relevance_${id}" style="font-size:0.8rem;">
+                    <option value="high" ${relevance==='high'?'selected':''}>主线关键</option>
+                    <option value="medium" ${relevance==='medium'?'selected':''}>支线重要</option>
+                    <option value="low" ${relevance==='low'?'selected':''}>路人</option>
+                </select>
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('npc-${id}').remove()" style="font-size:0.7rem;padding:0.2rem 0.5rem;">删除</button>
+            </div>
+            <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;gap:0.5rem;margin-top:0.3rem;">
+                <input type="text" name="npc_personality_${id}" placeholder="性格（可选）" value="${personality}" style="font-size:0.8rem;">
+                <input type="number" name="npc_intro_${id}" placeholder="登场章节（0=自动）" value="${intro}" min="0" style="font-size:0.8rem;">
+                <input type="number" name="npc_exit_${id}" placeholder="退场章节（0=自动）" value="${exit}" min="0" style="font-size:0.8rem;">
+            </div>
+            <div class="form-row" style="grid-template-columns:1fr;gap:0.5rem;margin-top:0.3rem;">
+                <input type="text" name="npc_backstory_${id}" placeholder="背景故事（可选）" value="${backstory}" style="font-size:0.8rem;">
+                <input type="text" name="npc_abilities_${id}" placeholder="能力/技能（可选）" value="${abilities}" style="font-size:0.8rem;">
+            </div>
+        </div>`;
+        document.getElementById('npc-list').insertAdjacentHTML('beforeend', html);
+    }
+    // Add first empty row by default
+    addNpcRow();
+
+    const form = document.getElementById('config-form');
+    const errorEl = document.getElementById('form-error');
+    const submitBtn = document.getElementById('submit-btn');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorEl.style.display = 'none';
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ 正在启动...';
+
+        const formData = new FormData(form);
+
+        try {
+            const resp = await fetch('/api/start', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!resp.ok) {
+                const err = await resp.json();
+                throw new Error(err.detail || '启动失败');
+            }
+
+            const { run_id } = await resp.json();
+            window.location.href = `/progress/${run_id}`;
+
+        } catch (err) {
+            errorEl.textContent = '❌ ' + err.message;
+            errorEl.style.display = 'block';
+            submitBtn.disabled = false;
+            submitBtn.textContent = '🚀 开始生成小说';
+        }
+    });
+    </script>
+</body>
+</html>
