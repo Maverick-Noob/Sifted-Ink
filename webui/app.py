@@ -177,9 +177,9 @@ async def _run_generation(run_id: str, config: StoryConfig, output_dir: str):
         # Phase 3: Story naming & summarization
         _emit(run_id, "phase", {"phase": 3, "label": "情节总结与起名"})
 
-        novel_text = generate_novel(result)
         story_name = f"{config.protagonist_name}的传奇"
         story_meta = {}
+        novel_text = generate_novel(result, story_name)
 
         # Story naming: rule-based candidates + LLM scoring
         has_content = any(v.chapter_count > 0 for v in result.versions)
@@ -205,6 +205,7 @@ async def _run_generation(run_id: str, config: StoryConfig, output_dir: str):
         _update_status(run_id, "running", "生成前附文...", 93)
 
         # Phase 3.5: Front matter generation
+        app_logger.info(f"[前附文] config.front_matter = {config.front_matter}")
         if config.front_matter:
             try:
                 client2 = LLMClient(config)
@@ -212,16 +213,22 @@ async def _run_generation(run_id: str, config: StoryConfig, output_dir: str):
                     config, story_name, novel_text,
                     llm_client=client2,
                 )
+                app_logger.info(f"[前附文] 生成结果长度: {len(fm_text)} 字符")
                 if fm_text:
-                    # Insert front matter after title but before chapters
-                    # Find first ## heading
                     first_ch = novel_text.find("\n## ")
+                    app_logger.info(f"[前附文] 第一个 ## 位置: {first_ch}")
                     if first_ch > 0:
                         novel_text = novel_text[:first_ch] + "\n" + fm_text + novel_text[first_ch:]
+                        app_logger.info(f"[前附文] 已插入到章节之前")
                     else:
                         novel_text = fm_text + novel_text
+                        app_logger.info(f"[前附文] 未找到 ##，追加到文本开头")
+                else:
+                    app_logger.warning(f"[前附文] generate_front_matter 返回空字符串")
             except Exception as e:
-                app_logger.warning(f"前附文生成失败: {e}")
+                app_logger.warning(f"前附文生成失败: {e}", exc_info=True)
+        else:
+            app_logger.info(f"[前附文] 跳过 — config.front_matter 为空")
 
         _update_status(run_id, "running", "保存文件...", 95)
 
@@ -240,6 +247,16 @@ async def _run_generation(run_id: str, config: StoryConfig, output_dir: str):
 
         novel_path = out_path / f"{file_base}.md"
         novel_path.write_text(novel_text, encoding="utf-8")
+        # Verify front matter was written
+        if config.front_matter:
+            written = novel_path.read_text(encoding="utf-8")
+            has_toc = "目录" in written
+            has_epigraph = "千墨选一" in written
+            app_logger.info(
+                f"[前附文] 文件验证: 目录={'✓' if has_toc else '✗'} "
+                f"引言={'✓' if has_epigraph else '✗'} "
+                f"文件大小={len(written)}字符"
+            )
 
         # Save generation parameters as YAML
         import yaml
@@ -275,8 +292,8 @@ async def _run_generation(run_id: str, config: StoryConfig, output_dir: str):
         )
 
         eval_log = generate_eval_log(result, story_meta)
-        # Save eval with fixed name for reliable downloads
-        eval_path = out_path / "eval_log.json"
+        # Save eval with same naming convention as novel
+        eval_path = out_path / f"{file_base}_eval.json"
         eval_path.write_text(json.dumps(eval_log, ensure_ascii=False, indent=2), encoding="utf-8")
         runs[run_id]["eval_path"] = str(eval_path)
 
@@ -482,9 +499,10 @@ async def start_generation(
     writing_style: str = Form(""),
 ):
     """Start a generation run. Returns JSON with run_id."""
-    # Parse front_matter and user NPCs from multi-value form fields
+    # Parse front_matter from hidden CSV field (more reliable than getlist)
     form_data = await request.form()
-    front_matter_values = form_data.getlist("front_matter")
+    front_matter_csv = form_data.get("front_matter_csv", "")
+    front_matter_values = [v.strip() for v in front_matter_csv.split(",") if v.strip()]
 
     # Parse dynamic protagonist fields (protagonist_name_N, protagonist_traits_N, ...)
     import re as _re
@@ -501,12 +519,10 @@ async def start_generation(
                 traits = form_data.get(f"protagonist_traits_{idx}", "").strip()
                 proto_traits_parts.append(f"{name}: {traits}" if traits else name)
                 role = form_data.get(f"protagonist_role_{idx}", "").strip()
-                abilities = form_data.get(f"protagonist_abilities_{idx}", "").strip()
                 intro = form_data.get(f"protagonist_intro_{idx}", "0").strip()
-                if role or abilities or intro:
+                if role or intro:
                     extras = []
                     if role: extras.append(f"角色: {role}")
-                    if abilities: extras.append(f"能力: {abilities}")
                     if intro and intro != "0": extras.append(f"登场: 第{intro}章")
                     if extras:
                         proto_order_parts.append(f"{name}({' / '.join(extras)})")
@@ -734,7 +750,23 @@ async def result_page(request: Request, run_id: str):
     if not result or run["status"] != "done":
         raise HTTPException(status_code=404, detail="Result not ready")
 
-    novel_text = generate_novel(result)
+    novel_text = generate_novel(result, run.get("story_name", ""))
+    # Re-apply front matter for display (result page re-generates novel_text)
+    cfg = run.get("config")
+    fm_text = ""
+    if cfg and cfg.front_matter:
+        try:
+            client2 = LLMClient(cfg)
+            fm_text = await generate_front_matter(cfg, run.get("story_name", ""), novel_text, llm_client=client2)
+        except Exception:
+            pass
+    if fm_text:
+        first_ch = novel_text.find("\n## ")
+        if first_ch > 0:
+            novel_text = novel_text[:first_ch] + "\n" + fm_text + novel_text[first_ch:]
+        else:
+            novel_text = fm_text + novel_text
+
     eval_log = generate_eval_log(result, run.get("story_meta"))
 
     return templates.TemplateResponse(
@@ -818,8 +850,23 @@ async def download_novel(run_id: str, format: str):
             if not result:
                 raise HTTPException(status_code=404, detail="Generation result not found")
 
-            novel_text = generate_novel(result)
-            title = run.get("story_name", f"{result.config.protagonist_name}的传奇")
+            sname = run.get("story_name", f"{result.config.protagonist_name}的传奇")
+            novel_text = generate_novel(result, sname)
+            # Apply front matter for non-MD downloads
+            cfg2 = run.get("config")
+            if cfg2 and cfg2.front_matter:
+                try:
+                    client3 = LLMClient(cfg2)
+                    fm2 = await generate_front_matter(cfg2, sname, novel_text, llm_client=client3)
+                    if fm2:
+                        first_ch2 = novel_text.find("\n## ")
+                        if first_ch2 > 0:
+                            novel_text = novel_text[:first_ch2] + "\n" + fm2 + novel_text[first_ch2:]
+                        else:
+                            novel_text = fm2 + novel_text
+                except Exception:
+                    pass
+            title = sname
             file_path_str = export_novel(novel_text, str(output_dir), format, title=title)
             # Rename to match our naming convention
             exported = Path(file_path_str)
@@ -828,7 +875,10 @@ async def download_novel(run_id: str, format: str):
                 exported.rename(target)
             file_path = target
         except ImportError as e:
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(
+                status_code=500,
+                detail=f"缺少依赖: {e}。EPUB 需要 pip install ebooklib，MOBI 需要安装 Calibre。"
+            )
         except RuntimeError as e:
             raise HTTPException(status_code=500, detail=str(e))
 
@@ -847,34 +897,14 @@ async def download_eval(run_id: str):
         raise HTTPException(status_code=404, detail="Run not found")
 
     run = runs[run_id]
-    output_dir = Path(run.get("output_dir", ""))
-
-    # Try multiple paths: stored path, then eval_log.json, then any .json eval file
-    candidates = [
-        Path(run.get("eval_path", "")),
-        output_dir / "eval_log.json",
-    ]
-    # Also search for any eval*.json files
-    try:
-        for f in output_dir.glob("*eval*.json"):
-            if f not in candidates:
-                candidates.append(f)
-    except Exception:
-        pass
-
-    eval_path = None
-    for p in candidates:
-        if p.exists():
-            eval_path = p
-            break
-
-    if eval_path is None:
+    eval_path = Path(run.get("eval_path", ""))
+    if not eval_path.exists():
         raise HTTPException(status_code=404, detail="Eval log not found")
 
     return FileResponse(
         str(eval_path),
         media_type="application/json",
-        filename="eval_log.json",
+        filename=eval_path.name,
     )
 
 

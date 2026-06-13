@@ -645,6 +645,17 @@ class DirectorAgent:
 
         chapters_remaining = max_ch - chapter + 1
 
+        # Word budget awareness
+        word_budget_hint = ""
+        if self.config.target_word_count <= 5000:
+            written = state.total_words
+            remaining_words = max(0, self.config.target_word_count - written)
+            word_budget_hint = (
+                f"\n**字数预算**：目标 {self.config.target_word_count} 字，"
+                f"已写 {written} 字，剩余 {remaining_words} 字。"
+                f"请紧缩篇幅，每章控制在 {max(100, remaining_words // max(chapters_remaining, 1))} 字以内。"
+            )
+
         # Next milestone
         next_milestone_text = "（无大纲）"
         if state.outline and state.outline.milestones:
@@ -676,6 +687,7 @@ class DirectorAgent:
             "pressure_emoji": pressure_emoji,
             "next_milestone_text": next_milestone_text,
             "stagnation_warning": stagnation_warning,
+            "word_budget_hint": word_budget_hint,
         }
 
     # ── Prompt builders ───────────────────────────────────────────────
@@ -1082,6 +1094,13 @@ class NarrativeWriter:
 
         chapter_num = state.chapter_count + 1
 
+        # Use Director-generated title if available (from chapter_title field)
+        director_title = director_decision.get("chapter_title", "").strip()
+        if director_title and 2 <= len(director_title) <= 20:
+            title_hint = f"\n## 本章标题\n{director_title}\n（请在叙事中自然地呼应此标题的意境）"
+        else:
+            title_hint = ""
+
         npc_text = ""
         for a in npc_actions:
             npc_text += f"- {a.agent_name} ({a.emotion}): {a.action} → {a.content}\n\n"
@@ -1090,7 +1109,22 @@ class NarrativeWriter:
         if self._style_instruction:
             style_note = f"\n## 风格参考\n本章请模仿 **{self.config.writing_style}** 的风格写作。\n"
 
-        user = f"""{prev_context}
+        # Build first-appearance NPC warning (at TOP for maximum attention)
+        first_appearance_npcs = [
+            n for n in state.active_npcs
+            if n.alive and n.active and n.intro_chapter == chapter_num
+        ]
+        npc_intro_warning = ""
+        if first_appearance_npcs:
+            names = "、".join(n.name for n in first_appearance_npcs)
+            npc_intro_warning = (
+                f"## ⚠️ 本章首次登场角色（必须在叙事中交代身份！）\n"
+                f"以下角色在本章首次出场：**{names}**。\n"
+                f"请在叙事中自然地介绍他们的身份、外貌特征和登场原因。\n"
+                f"不要让读者猜测'这人是谁'——每个新角色出场时至少用一两句话交代背景。\n\n"
+            )
+
+        user = f"""{npc_intro_warning}{prev_context}
 
 ## 本章导演指示
 {json.dumps(director_decision, ensure_ascii=False, indent=2)}
@@ -1100,6 +1134,7 @@ class NarrativeWriter:
 - 情绪: {protagonist_action.emotion}
 - 内容: {protagonist_action.content}
 - 内心想法: {protagonist_action.metadata.get('inner_thought', '')}
+{title_hint}
 {style_note}
 ## NPC 行动
 {npc_text or "本章无 NPC 参与行动"}
@@ -1116,7 +1151,17 @@ class NarrativeWriter:
 请写出本章的叙事文字："""
 
         text, tokens = await self.client.call(
-            self._build_system_prompt(), user, max_tokens=1500, temperature=0.9
+            self._build_system_prompt(), user, max_tokens=3000, temperature=0.9
         )
+
+        # Detect truncation: if output ends mid-sentence, log warning
+        if text and len(text) > 50:
+            last_char = text.strip()[-1]
+            sentence_ends = {'。', '！', '？', '”', '"', '…', '—', '~', '\n'}
+            if last_char not in sentence_ends and not text.strip().endswith('...'):
+                logger.warning(
+                    f"章节可能被截断（结尾字符: '{last_char}'），"
+                    f"建议增加 max_tokens 或减少 prompt 长度"
+                )
 
         return text, tokens

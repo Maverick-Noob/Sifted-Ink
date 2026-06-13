@@ -8,6 +8,11 @@ import os
 import re
 import shutil
 import subprocess
+import warnings
+from datetime import datetime
+
+# Suppress fpdf warnings (harmless version/style warnings)
+warnings.filterwarnings("ignore", category=UserWarning, module="fpdf")
 from pathlib import Path
 from typing import Optional
 
@@ -175,16 +180,18 @@ def export_epub(novel_text: str, output_path: str, title: str = "小说", author
     toc = []
 
     # Title page
-    if preamble:
+    if preamble and preamble.strip():
         c1 = epub.EpubHtml(
             title="扉页", file_name="chap_00.xhtml", lang="zh-CN",
         )
-        c1.content = f"<html><body>\n{preamble}\n</body></html>".encode("utf-8")
+        c1.content = f"<html><body>\n{preamble.strip()}\n</body></html>".encode("utf-8")
         c1.add_item(style)
         book.add_item(c1)
 
-    # Chapter files
+    # Chapter files (skip empty chapters)
     for i, (chap_title, content) in enumerate(chapters, 1):
+        if not content.strip():
+            continue
         chapter = epub.EpubHtml(
             title=chap_title, file_name=f"chap_{i:02d}.xhtml", lang="zh-CN",
         )
@@ -200,6 +207,17 @@ def export_epub(novel_text: str, output_path: str, title: str = "小说", author
         book.add_item(chapter)
         spine.append(chapter)
         toc.append(epub.Link(f"chap_{i:02d}.xhtml", chap_title, f"ch{i}"))
+
+    # Ensure at least one chapter exists
+    if not spine or len(spine) <= 1:
+        dummy = epub.EpubHtml(
+            title="内容", file_name="chap_01.xhtml", lang="zh-CN",
+        )
+        dummy.content = "<html><body><p>（暂无内容）</p></body></html>".encode("utf-8")
+        dummy.add_item(style)
+        book.add_item(dummy)
+        spine.append(dummy)
+        toc.append(epub.Link("chap_01.xhtml", "内容", "ch1"))
 
     book.toc = toc
     book.spine = spine
@@ -321,23 +339,69 @@ def export_pdf(novel_text: str, output_path: str, title: str = "小说") -> str:
     pdf.add_font("CJK", "", font_path, uni=True)
     pdf.add_font("CJK", "B", font_path, uni=True)  # fpdf2 treats same file as bold
 
-    # ── Title page ──
-    pdf.add_page()
-    pdf.ln(40)
-    pdf.set_font("CJK", "B", 22)
-    pdf.set_text_color(40, 40, 40)
-    pdf.multi_cell(0, 14, title, align="C")
-    pdf.ln(8)
-    pdf.set_font("CJK", "", 11)
-    pdf.set_text_color(120, 120, 120)
-    pdf.cell(0, 8, "由 选墨集 / Sifted-Ink 生成", align="C")
-    pdf.ln(20)
-    pdf.set_draw_color(180, 180, 180)
-    pdf.line(40, pdf.get_y(), pdf.w - 40, pdf.get_y())
-
     # ── Chapters ──
     chapters, preamble = _parse_chapters(novel_text)
-    plain_text = _clean_markdown(novel_text)
+
+    # Render preamble sections — each on its own page
+    if preamble.strip():
+        # Split preamble into sections by --- separator
+        sections = [s.strip() for s in preamble.split('\n---\n') if s.strip()]
+        for section in sections:
+            pdf.add_page()
+            pdf.set_font("CJK", "", 10)
+            pdf.set_text_color(60, 60, 60)
+            lines = section.split('\n')
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    pdf.ln(4)
+                    continue
+                # Render markdown headers
+                if line.startswith('# '):
+                    # Title page — centered, large, with decorative line
+                    pdf.set_font("CJK", "B", 24)
+                    pdf.set_text_color(40, 40, 40)
+                    pdf.ln(35)
+                    pdf.multi_cell(0, 14, _clean_markdown(line), align="C")
+                    pdf.ln(6)
+                    pdf.set_font("CJK", "", 10)
+                    pdf.set_text_color(140, 140, 140)
+                    pdf.cell(0, 8, "选墨集 / Sifted-Ink", align="C")
+                    pdf.ln(14)
+                    pdf.set_draw_color(180, 180, 180)
+                    x0 = pdf.get_x()
+                    pdf.line(50, pdf.get_y(), pdf.w - 50, pdf.get_y())
+                    pdf.ln(8)
+                    pdf.set_font("CJK", "", 10)
+                    pdf.set_text_color(60, 60, 60)
+                elif line.startswith('## '):
+                    pdf.set_font("CJK", "B", 13)
+                    pdf.set_text_color(40, 40, 40)
+                    pdf.multi_cell(0, 10, _clean_markdown(line), align="L")
+                    pdf.ln(2)
+                    pdf.set_font("CJK", "", 10)
+                    pdf.set_text_color(60, 60, 60)
+                elif line.startswith('> '):
+                    # Blockquote / epigraph
+                    pdf.set_font("CJK", "", 9)
+                    pdf.set_text_color(100, 100, 100)
+                    pdf.multi_cell(0, 8, _clean_markdown(line), align="C")
+                    pdf.set_font("CJK", "", 10)
+                    pdf.set_text_color(60, 60, 60)
+                elif line.startswith('- ') and ('章' in line):
+                    # TOC entry
+                    pdf.set_font("CJK", "", 9)
+                    pdf.multi_cell(0, 7, _clean_markdown(line), align="L")
+                    pdf.set_font("CJK", "", 10)
+                elif line.startswith('|'):
+                    # Table row (character table)
+                    pdf.set_font("CJK", "", 8)
+                    pdf.multi_cell(0, 6, _clean_markdown(line), align="L")
+                    pdf.set_font("CJK", "", 10)
+                else:
+                    line = _clean_markdown(line)
+                    pdf.multi_cell(0, 7, line, align="J")
+                pdf.ln(1)
 
     for chap_title, content in chapters:
         pdf.add_page()
@@ -427,8 +491,6 @@ FORMATS = {
     "txt":   {"ext": ".txt",  "label": "纯文本",       "mime": "text/plain"},
     "epub":  {"ext": ".epub", "label": "EPUB 电子书",  "mime": "application/epub+zip"},
     "pdf":   {"ext": ".pdf",  "label": "PDF 文档",     "mime": "application/pdf"},
-    "mobi":  {"ext": ".mobi", "label": "Kindle (MOBI)", "mime": "application/x-mobipocket-ebook"},
-    "azw":   {"ext": ".azw3","label": "Kindle (AZW3)", "mime": "application/vnd.amazon.mobi8-ebook"},
 }
 
 
@@ -463,14 +525,12 @@ def export_novel(
         "txt":  export_txt,
         "epub": export_epub,
         "pdf":  export_pdf,
-        "mobi": export_mobi,
-        "azw":  export_azw,
     }
 
     export_fn = exporters[format]
 
     # EPUB/MOBI/AZW/PDF accept title/author
-    if format in ("epub", "mobi", "azw"):
+    if format == "epub":
         return export_fn(novel_text, output_path, title, author)
     elif format == "pdf":
         return export_fn(novel_text, output_path, title)

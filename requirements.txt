@@ -13,4 +13,5 @@ fpdf2>=2.7
 # API SDKs (install at least one)
 anthropic>=0.30
 openai>=1.30
+httpx<0.28
 google-generativeai>=0.6

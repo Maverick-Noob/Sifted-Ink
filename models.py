@@ -150,6 +150,7 @@ class Chapter:
     protagonist_action: Optional[AgentAction] = None
     npc_actions: list[AgentAction] = field(default_factory=list)
     director_notes: str = ""              # Director's reasoning for this chapter
+    chapter_title: str = ""               # Director-generated chapter title
     npcs_introduced: list[NPC] = field(default_factory=list)
     npcs_exited: list[str] = field(default_factory=list)  # NPC ids that exited
     token_cost: int = 0                   # tokens consumed for this chapter

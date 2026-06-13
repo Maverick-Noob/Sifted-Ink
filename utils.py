@@ -222,10 +222,15 @@ def _fix_unescaped_quotes(text: str) -> str:
 def _safe_parse_json(text: str) -> Optional[dict]:
     """
     Parse text as JSON. Uses json5 for maximum leniency with LLM output.
+    Pre-processes to fix unescaped quotes inside string values.
     Returns None for empty/malformed input instead of raising.
     """
     if not text or not text.strip():
         return None
+
+    # Pre-fix unescaped quotes (LLM dialogue in JSON values)
+    text = _fix_unescaped_quotes(text)
+
     try:
         import json5
         parsed = json5.loads(text)
