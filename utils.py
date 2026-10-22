@@ -367,77 +367,189 @@ def safe_filename(name: str, max_len: int = 50) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Writing style loading
+# Narrative technique loading
+#
+# NOTE: the former "pick a writer to imitate" feature was removed on
+# 2026-10-21. Imitating a named author is a copyright risk (171 of the 183
+# entries were NOT in the public domain), and the write prompt used to inject
+# the author's name plus their works verbatim. What remains is a library of
+# *techniques* — executable style specs with no author attached. A technique
+# is a method; copyright protects expression, not methods.
 # ---------------------------------------------------------------------------
 
-_WRITING_STYLES: list[dict] | None = None
+_NARRATIVE_TECHNIQUES: list[dict] | None = None
 
 
-def load_writing_styles() -> list[dict]:
-    """Load writing styles from the bundled JSON file. Cached after first call."""
-    global _WRITING_STYLES
-    if _WRITING_STYLES is not None:
-        return _WRITING_STYLES
+def load_narrative_techniques() -> list[dict]:
+    """Load narrative techniques from the bundled JSON file. Cached after first call."""
+    global _NARRATIVE_TECHNIQUES
+    if _NARRATIVE_TECHNIQUES is not None:
+        return _NARRATIVE_TECHNIQUES
 
     import os as _os
-    json_path = _os.path.join(_os.path.dirname(__file__), "writing_style.json")
+    json_path = _os.path.join(_os.path.dirname(__file__), "narrative_techniques.json")
     if not _os.path.exists(json_path):
-        logger.warning(f"写作风格文件未找到: {json_path}")
-        _WRITING_STYLES = []
-        return _WRITING_STYLES
+        logger.warning(f"叙事手法库未找到: {json_path}")
+        _NARRATIVE_TECHNIQUES = []
+        return _NARRATIVE_TECHNIQUES
 
     with open(json_path, "r", encoding="utf-8") as f:
-        _WRITING_STYLES = json.load(f)
-    return _WRITING_STYLES
+        _NARRATIVE_TECHNIQUES = json.load(f)
+    return _NARRATIVE_TECHNIQUES
 
 
-def get_style_by_name(name: str) -> dict | None:
-    """Get a specific writer's style info by name."""
-    styles = load_writing_styles()
-    for s in styles:
-        if s.get("name") == name:
-            return s
+def get_technique_by_id(technique_id: str) -> dict | None:
+    """Get a single technique spec by its id (built-in or user-defined)."""
+    for t in load_narrative_techniques():
+        if t.get("id") == technique_id:
+            return t
+    for t in load_user_techniques():
+        if t.get("id") == technique_id:
+            return t
     return None
 
 
-def get_regions() -> list[str]:
-    """Get sorted list of unique regions."""
-    styles = load_writing_styles()
-    regions = sorted(set(s.get("region", "其他") for s in styles))
-    return regions
+def get_technique_categories() -> list[str]:
+    """Sorted list of unique technique categories."""
+    cats = set(t.get("category", "其他") for t in load_narrative_techniques())
+    cats.update(t.get("category", "其他") for t in load_user_techniques())
+    return sorted(cats)
 
 
-def get_writers_by_region(region: str | None = None) -> list[dict]:
-    """Get writers, optionally filtered by region."""
-    styles = load_writing_styles()
-    if region:
-        return [s for s in styles if s.get("region") == region]
-    return styles
+def get_techniques_by_category(category: str | None = None) -> list[dict]:
+    """Get techniques, optionally filtered by category (built-in + user-defined)."""
+    techs = load_narrative_techniques() + load_user_techniques()
+    if category:
+        return [t for t in techs if t.get("category") == category]
+    return techs
 
 
-def build_style_prompt(writer_name: str) -> str:
-    """
-    Build a style instruction snippet to inject into the narrative writer prompt.
-    Returns empty string if no style selected.
-    """
-    if not writer_name:
-        return ""
+# ── User-defined techniques ──────────────────────────────────────────────
+# A user technique is a free-text description of the author's OWN style.
+# Ids are "user:<slug>". No third-party names are ever stored here.
 
-    style = get_style_by_name(writer_name)
-    if not style:
-        return ""
+_USER_TECHNIQUES: list[dict] | None = None
 
-    works = "、".join(style.get("representative_works", [])[:2])
+
+def _user_techniques_path() -> str:
+    import os as _os
+    return _os.path.join(_os.path.dirname(__file__), "user_techniques.json")
+
+
+def load_user_techniques() -> list[dict]:
+    """Load user-defined techniques from user_techniques.json. Cached after first call."""
+    global _USER_TECHNIQUES
+    if _USER_TECHNIQUES is not None:
+        return _USER_TECHNIQUES
+
+    import os as _os
+    path = _user_techniques_path()
+    if not _os.path.exists(path):
+        _USER_TECHNIQUES = []
+        return _USER_TECHNIQUES
+
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            _USER_TECHNIQUES = json.load(f)
+    except Exception as e:  # a broken user file must not break startup
+        logger.warning(f"用户自定义叙事手法文件读取失败: {e}")
+        _USER_TECHNIQUES = []
+    return _USER_TECHNIQUES
+
+
+def save_user_techniques(techniques: list[dict]) -> None:
+    """Persist user-defined techniques."""
+    with open(_user_techniques_path(), "w", encoding="utf-8") as f:
+        json.dump(techniques, f, ensure_ascii=False, indent=2)
+    global _USER_TECHNIQUES
+    _USER_TECHNIQUES = techniques
+
+
+def slugify_technique(name: str) -> str:
+    """Build an id-safe slug from a technique name."""
+    import re as _re
+    slug = _re.sub(r"[^\w一-鿿-]+", "-", name.strip().lower())
+    slug = _re.sub(r"-+", "-", slug).strip("-")
+    return slug or "technique"
+
+
+def _custom_technique_block(desc: str, name: str = "") -> str:
+    """Prompt block for a user-supplied technique description."""
+    label = f"**{name}**" if name else "用户自定义"
     return f"""
-## 写作风格要求
-请模仿 **{style['name']}** 的写作风格进行创作：
-- {style['style']}
-- 代表作品：{works}
+## 叙事手法要求
+本故事使用 {label} 这一套叙事手法。
 
-在叙事中体现这位作家的语言特色、叙事节奏和审美取向，但不要直接抄袭其作品内容。
+{desc}
 
-⚠️ 法律提示：模仿在世作家的风格可能涉及著作权风险。本工具不保证生成内容与特定作家风格一致，用户应对生成内容的使用承担全部责任。
+要求：把上述描述转成**可执行的写作约束**（人称、句长、对话率、描写与心理的配比、禁用词），
+不要照抄用户原文的措辞，也不要模仿任何特定在世或已故作家的可识别风格。
 """
+
+
+def build_technique_prompt(technique_id: str) -> str:
+    """
+    Build a narrative-technique instruction for the writer prompt.
+
+    `technique_id` may be:
+      - an id from narrative_techniques.json
+      - "user:<slug>" for a technique saved by the user
+      - "custom:<free text>" for an inline description of the user's own style
+    Returns an empty string when nothing is selected.
+    """
+    if not technique_id:
+        return ""
+
+    # A technique saved by the user (their own words, no third-party rights)
+    if technique_id.startswith("user:"):
+        for t in load_user_techniques():
+            if t.get("id") == technique_id:
+                return _custom_technique_block(t.get("summary", ""), t.get("name", ""))
+        logger.warning(f"未知的用户自定义叙事手法 id: {technique_id}（已忽略）")
+        return ""
+
+    # Inline free-text description
+    if technique_id.startswith("custom:"):
+        desc = technique_id[len("custom:"):].strip()
+        if not desc:
+            return ""
+        return _custom_technique_block(desc)
+
+    technique = get_technique_by_id(technique_id)
+    if not technique:
+        logger.warning(f"未知的叙事手法 id: {technique_id}（已忽略）")
+        return ""
+
+    spec = technique.get("spec", {})
+    forbidden = spec.get("forbidden", [])
+    forbidden_text = "、".join(forbidden) if forbidden else "无"
+
+    return f"""
+## 叙事手法要求
+本故事使用 **{technique['name']}** 这一套叙事手法（{technique.get('category', '')}）。
+
+{technique.get('summary', '')}
+
+### 可执行规格（必须逐条遵守）
+- **叙事人称**：{spec.get('narrative_person', '第三人称限知')}
+- **视角距离**：{spec.get('viewpoint_distance', '中')}
+- **句长**：中位约 {spec.get('sentence_length_p50', 15)} 字，长句不超过 {spec.get('sentence_length_p90', 30)} 字
+- **单段最多**：{spec.get('paragraph_max_sentences', 3)} 句
+- **对话占比**：约 {int(float(spec.get('dialogue_ratio', 0.3)) * 100)}%
+- **描写占比**：约 {int(float(spec.get('description_ratio', 0.3)) * 100)}%
+- **心理活动占比**：约 {int(float(spec.get('psychology_ratio', 0.15)) * 100)}%
+- **用词**：{spec.get('vocabulary', '')}
+- **意象取材**：{spec.get('imagery', '')}
+- **语体**：{spec.get('register', '')}
+- **节奏**：{spec.get('rhythm', '')}
+
+### 禁用表达（命中即视为不合格）
+{forbidden_text}
+
+### 参考样例（学习节奏与质感，**不要复用其中任何词句**）
+{technique.get('sample_paragraph', '')}
+"""
+
 
 
 # ---------------------------------------------------------------------------
@@ -472,14 +584,6 @@ def moderate_content(text: str) -> dict:
         "hits": hits,
         "clean": len(hits) == 0,
     }
-
-
-def is_author_public_domain(name: str) -> bool:
-    """Check if an author is in the public domain (deceased 50+ years)."""
-    style = get_style_by_name(name)
-    if style:
-        return style.get("is_public_domain", False)
-    return False
 
 
 # ---------------------------------------------------------------------------

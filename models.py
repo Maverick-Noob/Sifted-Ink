@@ -31,7 +31,9 @@ class StoryConfig:
     target_word_count: int = 8000
 
     # Writing style
-    writing_style: str = ""           # selected writer name, empty = default
+    narrative_technique: str = ""     # id from narrative_techniques.json,
+                                      # or "custom:<free text>" for the user's own style
+                                      # empty = no technique (default)
 
     # NPC naming
     npc_name_style: str = "default"   # default / chinese / japanese / western / mixed
@@ -63,7 +65,10 @@ class StoryConfig:
     # Constraint configuration
     max_npcs: int = 30
     total_token_budget: Optional[int] = None  # None = unlimited
-    num_versions: int = 3            # number of parallel pre-rehearsal versions (max 500)
+    num_versions: int = 1            # number of parallel pre-rehearsal versions (max 500)
+                                      # default 1: batch generation is a platform-compliance
+                                      # risk (fanqie judges "是否批量生成") and must be opted
+                                      # into explicitly, not the default
     max_chapters: int = 30
     version_timeout_seconds: int = 1800  # 30 minutes per version
     max_tokens_per_call: int = 4000

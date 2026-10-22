@@ -23,11 +23,15 @@
 
 ```bash
 # 克隆项目
-git clone <repo-url>
-cd novel_preactor
+git clone https://github.com/Maverick-Noob/Sifted-Ink.git
+cd Sifted-Ink
 
-# 安装依赖
-pip install -r requirements.txt
+# 安装（核心 + Web 界面）
+pip install -e .
+
+# 按需追加模型厂商 SDK / 导出格式
+pip install -e ".[all-providers]"
+pip install -e ".[export]"
 ```
 
 ### 1.2 设置 API Key
@@ -93,7 +97,7 @@ python -m novel_preactor --interactive
 | 参数 | 默认 | 说明 |
 |------|------|------|
 | 目标字数 | 8000 | 最终小说的大致长度。AI 会按剩余字数动态调整每章篇幅 |
-| 并行版本 | 3 | 同时探索的故事版本数。越多越可能找到精彩情节，但消耗更多 Token |
+| 并行版本 | 1 | 同时探索的故事版本数。**默认 1**；越多越可能找到精彩情节，但费用线性增长，且批量生成是平台治理的判定维度之一 |
 | 章节上限 | 30 | 单版本最多允许的章节数，防止无限循环 |
 | NPC 上限 | 30 | 故事中最多同时存在的 NPC 数量 |
 | Token 预算 | 0（不限） | 设置上限可控制成本 |
@@ -129,14 +133,18 @@ python -m novel_preactor --interactive
 
 AI 仍可自由创建额外 NPC，用户定义的角色会被优先使用。
 
-### 2.8 写作风格
+### 2.8 叙事手法
 
-- **搜索框**：输入作家名或关键词筛选 183 位作家
-- **公版安全** ✅：已故 50+ 年的作家，可安全使用
-- **在世作家** 🟡：选择后会显示法律提示
-- **自定义风格**：展开「添加自定义风格」自行定义
+- **搜索框**：输入手法名或关键词筛选 15 套内置手法
+- **可执行规格**：每套手法给出人称 / 视角距离 / 句长 p50·p90 / 对话·描写·心理比例 /
+  用词 / 意象取材 / 语体 / 节奏，以及一份**禁用表达**清单
+- **参考样例**：150 字自撰样例，学习节奏与质感
+- **添加我自己的手法**：展开后填写手法名 + 描述，保存到本地 `user_techniques.json`
 
-不选则使用默认风格。
+不选则使用默认叙事。
+
+> 早期版本提供过「模仿 183 位作家」的选项，因著作权风险已移除。手法是方法，
+> 著作权不保护方法只保护具体表达——详见 [使用条款](TERMS.md) 第 3 节。
 
 ### 2.9 前附文
 
@@ -148,7 +156,7 @@ AI 仍可自由创建额外 NPC，用户定义的角色会被优先使用。
 
 ### 2.10 API 设置
 
-1. 选择**模型供应商**（13 家可选）
+1. 选择**模型供应商**（12 家可选；`custom` 自定义端点需用 YAML 配置）
 2. 模型名自动填入（可修改）
 3. API Key 可留空——自动从环境变量读取
 
@@ -316,7 +324,7 @@ story_end: "林远找到炎之心，击败幕后黑手，成为火焰守护者�
 
 # 字数与版本
 target_word_count: 8000
-num_versions: 3
+num_versions: 1
 
 # 约束
 max_chapters: 30
@@ -339,7 +347,8 @@ user_npcs:
 
 # 命名与风格（可选）
 naming_style: ""
-writing_style: ""
+narrative_technique: ""     # 留空=不指定；可选值见 narrative_techniques.json
+                            # 也可写 "custom:你自己的风格描述"
 quality_mode: "balanced"
 front_matter: ["toc"]
 

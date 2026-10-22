@@ -19,7 +19,13 @@ env/
 # Project specific
 logs/
 user_styles.json
+user_techniques.json
 output/
+
+# The retired writer-imitation corpus: kept locally as a historical record only.
+# It must not be committed or shipped — the feature it belonged to was removed
+# for copyright reasons. See docs/research/README.md.
+docs/research/author_corpus.json
 
 # OS
 .DS_Store

@@ -28,7 +28,7 @@ from .prompts import (
     NPC_SYSTEM_PROMPT,
     EVALUATOR_SYSTEM_PROMPT,
 )
-from .utils import extract_json, logger, build_style_prompt, build_npc_name_instruction
+from .utils import extract_json, logger, build_technique_prompt, build_npc_name_instruction
 
 
 # =========================================================================
@@ -207,6 +207,12 @@ class LLMClient:
         # Lazy-init
         self._client = None
 
+        # Real usage accounting (populated from the API response, not estimated)
+        self.total_tokens_used = 0
+        self.call_count = 0
+        # Optional TokenBudget; when set, every call consumes its real usage
+        self.budget = None
+
     @property
     def provider_name(self) -> str:
         return self._provider_info.get("name", self.provider)
@@ -265,13 +271,20 @@ class LLMClient:
 
         sdk = self.sdk_type
         if sdk == "anthropic":
-            return await self._call_anthropic(system_prompt, user_message, max_tok, temperature)
+            text, tokens = await self._call_anthropic(system_prompt, user_message, max_tok, temperature)
         elif sdk == "openai":
-            return await self._call_openai(system_prompt, user_message, max_tok, temperature)
+            text, tokens = await self._call_openai(system_prompt, user_message, max_tok, temperature)
         elif sdk == "google":
-            return await self._call_google(system_prompt, user_message, max_tok, temperature)
+            text, tokens = await self._call_google(system_prompt, user_message, max_tok, temperature)
         else:
             raise RuntimeError(f"未实现的 SDK: {sdk}")
+
+        # Account the real usage reported by the API
+        self.total_tokens_used += tokens
+        self.call_count += 1
+        if self.budget is not None:
+            await self.budget.consume(tokens)
+        return text, tokens
 
     async def _call_anthropic(
         self, system_prompt: str, user_message: str, max_tokens: int, temperature: float
@@ -1063,14 +1076,14 @@ class NarrativeWriter:
     def __init__(self, client: LLMClient, config: StoryConfig):
         self.client = client
         self.config = config
-        # Build style instruction once
-        self._style_instruction = build_style_prompt(config.writing_style)
+        # Build technique instruction once
+        self._technique_instruction = build_technique_prompt(config.narrative_technique)
 
     def _build_system_prompt(self) -> str:
-        """System prompt with optional style instruction."""
+        """System prompt with optional technique instruction."""
         prompt = self.WRITER_SYSTEM_PROMPT
-        if self._style_instruction:
-            prompt += "\n" + self._style_instruction
+        if self._technique_instruction:
+            prompt += "\n" + self._technique_instruction
         return prompt
 
     async def write_chapter(
@@ -1106,8 +1119,11 @@ class NarrativeWriter:
             npc_text += f"- {a.agent_name} ({a.emotion}): {a.action} → {a.content}\n\n"
 
         style_note = ""
-        if self._style_instruction:
-            style_note = f"\n## 风格参考\n本章请模仿 **{self.config.writing_style}** 的风格写作。\n"
+        if self._technique_instruction:
+            style_note = (
+                "\n## 叙事手法\n请严格遵守系统提示中的「叙事手法要求」执行本章节，"
+                "并逐条对照其中的可执行规格与禁用表达。\n"
+            )
 
         # Build first-appearance NPC warning (at TOP for maximum attention)
         first_appearance_npcs = [

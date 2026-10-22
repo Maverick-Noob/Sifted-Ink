@@ -42,6 +42,25 @@ def _detect_provider(model: str, explicit_provider: str = "") -> str:
     return explicit_provider or "anthropic"
 
 
+def _build_user_npc(raw: dict) -> UserNPC:
+    """
+    Build a UserNPC from a YAML mapping, ignoring unknown keys.
+
+    Previously this was ``UserNPC(**raw)``, which raised a raw TypeError when
+    a config contained a stray key. Unknown keys are now dropped with a warning.
+    """
+    if not isinstance(raw, dict):
+        raise ValueError(f"user_npcs 条目必须是字典，收到: {type(raw).__name__}")
+
+    allowed = {"name", "role", "personality", "relevance", "intro_chapter",
+               "backstory", "exit_chapter", "abilities"}
+    known = {k: v for k, v in raw.items() if k in allowed}
+    unknown = set(raw) - allowed
+    if unknown:
+        print(f"  [提示] user_npcs 中忽略了未知字段: {', '.join(sorted(unknown))}")
+    return UserNPC(**known)
+
+
 def load_config_from_yaml(filepath: str) -> StoryConfig:
     """Load story configuration from a YAML file."""
     with open(filepath, "r", encoding="utf-8") as f:
@@ -50,12 +69,26 @@ def load_config_from_yaml(filepath: str) -> StoryConfig:
     if not data:
         raise ValueError(f"配置文件 {filepath} 为空")
 
-    # Resolve API key: file > env var
-    api_key = data.get("api_key", "") or os.environ.get("SIFTED_INK_API_KEY", "")
+    # Resolve provider first (an explicit provider wins; otherwise the model
+    # name decides), then resolve the API key against that provider.
+    provider = _detect_provider(
+        data.get("model", "claude-sonnet-4-6"), data.get("api_provider", "")
+    )
+    api_key = data.get("api_key", "") or resolve_api_key(provider, "")
 
     # Resolve token budget: 0 or missing = unlimited
     raw_budget = data.get("total_token_budget", 0)
     token_budget = raw_budget if raw_budget and raw_budget > 0 else None
+
+    # Narrative technique. The legacy "writing_style" key held a writer name to
+    # imitate; that feature is gone, so the value is ignored with a warning.
+    technique = data.get("narrative_technique", "")
+    if not technique and data.get("writing_style"):
+        print(
+            "  [提示] 配置中的 writing_style（模仿特定作家）功能已移除并被忽略。"
+            "\n         请改用 narrative_technique: <手法 id>，可选值见 narrative_techniques.json。"
+        )
+        technique = ""
 
     config = StoryConfig(
         protagonist_name=data.get("protagonist_name", ""),
@@ -64,7 +97,7 @@ def load_config_from_yaml(filepath: str) -> StoryConfig:
         story_start=data.get("story_start", ""),
         story_end=data.get("story_end", ""),
         target_word_count=data.get("target_word_count", 8000),
-        writing_style=data.get("writing_style", ""),
+        narrative_technique=technique,
         npc_name_style=data.get("npc_name_style", "default"),
         protagonist_mode=data.get("protagonist_mode", "spotlight"),
         protagonist_count=data.get("protagonist_count", 1),
@@ -72,15 +105,15 @@ def load_config_from_yaml(filepath: str) -> StoryConfig:
         npc_mode=data.get("npc_mode", "parallel"),
         quality_mode=data.get("quality_mode", "balanced"),
         naming_style=data.get("naming_style", ""),
-        user_npcs=[UserNPC(**n) for n in data.get("user_npcs", [])],
+        user_npcs=[_build_user_npc(n) for n in data.get("user_npcs", [])],
         front_matter=data.get("front_matter", []),
         api_key=api_key,
         model=data.get("model", "claude-sonnet-4-6"),
-        api_provider=data.get("api_provider", "anthropic"),
+        api_provider=provider,
         api_base_url=data.get("api_base_url", ""),
         max_npcs=data.get("max_npcs", 30),
         total_token_budget=token_budget,
-        num_versions=data.get("num_versions", 3),
+        num_versions=data.get("num_versions", 1),
         max_chapters=data.get("max_chapters", 30),
         version_timeout_seconds=data.get("version_timeout_seconds", 1800),
         max_tokens_per_call=data.get("max_tokens_per_call", 4000),
@@ -124,26 +157,39 @@ def load_config_interactive() -> StoryConfig:
         print("  (将自动生成戏剧性结局)")
 
     target_word_count = int(_prompt("目标总字数", "8000"))
-    num_versions = int(_prompt("并行预演版本数 (1-500，推荐 3~10)", "3"))
+    num_versions = int(_prompt("并行预演版本数 (1-500，默认 1)", "1"))
+    if num_versions > 1:
+        print(
+            f"  [注意] 你选择了 {num_versions} 个并行版本。批量生成是平台治理的判定维度之一"
+            "\n         （番茄《低质治理公告》：是否批量生成 / 是否严重缺乏原创性），"
+            "\n         建议先跑 1 版确认方向，必要时再开多版。"
+        )
     max_npcs = int(_prompt("NPC 数量上限", "30"))
     budget_input = _prompt("总 token 预算（0=不限制）", "0")
     total_token_budget = int(budget_input) if int(budget_input) > 0 else None
 
+    technique_id = _prompt(
+        "叙事手法 id（留空=不指定，可选值见 narrative_techniques.json）", ""
+    )
+    custom_technique = ""
+    if technique_id.strip().lower() == "custom":
+        custom_technique = _prompt("自定义叙事手法描述（你自己的风格要求）", "")
+        technique_id = f"custom:{custom_technique}" if custom_technique else ""
+
     model = _prompt("模型名称", "claude-sonnet-4-6")
     api_provider = _prompt(
-        "API 提供商\n"
+        "API 提供商（留空=按模型名自动匹配）\n"
         "  anthropic/openai/google/deepseek/moonshot/zhipu/qwen/baichuan/minimax/grok/mistral/cohere/custom",
-        "anthropic"
+        ""
     )
+    # Auto-detect provider from the model name when not explicitly given
+    api_provider = _detect_provider(model, api_provider)
     api_key = _prompt(
         f"API Key（留空则使用环境变量 {PROVIDER_REGISTRY.get(api_provider, {}).get('api_key_env', 'SIFTED_INK_API_KEY')}）",
         ""
     )
     # Resolve API key from provider-specific env var
     resolved_key = api_key or resolve_api_key(api_provider, "")
-
-    # Auto-detect provider from model if not explicitly set
-    api_provider = _detect_provider(model, api_provider)
 
     config = StoryConfig(
         protagonist_name=protagonist_name,
@@ -152,6 +198,7 @@ def load_config_interactive() -> StoryConfig:
         story_start=story_start,
         story_end=story_end,
         target_word_count=target_word_count,
+        narrative_technique=technique_id,
         api_key=resolved_key,
         model=model,
         api_provider=api_provider,

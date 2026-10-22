@@ -26,6 +26,7 @@ import yaml
 from .agents import LLMClient
 from .naming import NamingEngine
 from .utils import logger
+from .estimation import estimate_run as estimate_generation_run, format_estimate
 
 
 def parse_args():
@@ -103,6 +104,21 @@ BANNER = r"""
 """
 
 
+def _force_utf8_console():
+    """
+    Make stdout/stderr UTF-8 tolerant.
+
+    The default Windows console codepage is GBK, which cannot encode the
+    banner, the emoji in the log messages or the "—" in the estimate notes.
+    Without this, printing them raises UnicodeEncodeError and kills the run.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError, OSError):
+            pass
+
+
 def _show_banner():
     """Print the project banner to stdout."""
     # Use print for raw output, not through logger
@@ -112,6 +128,7 @@ def _show_banner():
 
 async def main_async(args):
     """Async main entry point."""
+    _force_utf8_console()
     _show_banner()
 
     # --- Web UI mode ---
@@ -123,7 +140,9 @@ async def main_async(args):
         sys.stdout.write(f"\n  🌐 Web UI → http://localhost:{args.port}\n\n")
         sys.stdout.flush()
 
-        config = uvicorn.Config(app, host="0.0.0.0", port=args.port, log_level="info")
+        # Bind to loopback by default: the UI has no authentication and the form
+        # collects an API key, so it must not be reachable from the local network.
+        config = uvicorn.Config(app, host="127.0.0.1", port=args.port, log_level="info")
         server = uvicorn.Server(config)
         await server.serve()
         return
@@ -171,6 +190,16 @@ async def main_async(args):
     logger.info(f"  Token 预算: {config.total_token_budget or '无限制'}")
     logger.info(f"  模型: {config.model} ({config.api_provider})")
     logger.info(f"  输出目录: {output_dir.absolute()}")
+    logger.info("=" * 50)
+
+    # --- Cost / duration estimate (before any token is spent) ---
+    est = estimate_generation_run(config)
+    logger.info("")
+    logger.info("  【消耗预估】")
+    logger.info(f"  {format_estimate(est)}")
+    for note in est["notes"]:
+        logger.info(f"    · {note}")
+    logger.info("")
     logger.info("=" * 50)
     logger.info("")
 
@@ -257,7 +286,7 @@ async def main_async(args):
             "num_versions": config.num_versions,
             "max_npcs": config.max_npcs,
             "max_chapters": config.max_chapters,
-            "writing_style": config.writing_style or "默认",
+            "narrative_technique": config.narrative_technique or "默认",
             "naming_style": config.naming_style or "自动",
             "npc_name_style": config.npc_name_style,
             "front_matter": config.front_matter,

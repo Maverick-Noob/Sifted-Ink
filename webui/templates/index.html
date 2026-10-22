@@ -99,51 +99,50 @@
                 <button type="button" class="btn btn-outline" onclick="addNpcRow()" style="font-size:0.8rem;margin-top:0.5rem;">➕ 添加 NPC</button>
             </div>
 
-            <!-- ── 写作风格 ── -->
+            <!-- ── 叙事手法 ── -->
             <div class="card card-half">
                 <div class="card-header">
                     <span class="icon">🖋️</span>
-                    <h3>写作风格 <span style="font-weight:400;font-size:0.8rem;color:var(--text-muted);">（可选）</span></h3>
+                    <h3>叙事手法 <span style="font-weight:400;font-size:0.8rem;color:var(--text-muted);">（可选）</span></h3>
                 </div>
                 <div class="form-group">
-                    <label>搜索作家</label>
-                    <input type="text" id="style-search" placeholder="输入作家名或关键词筛选…" oninput="filterStyles()" autocomplete="off">
+                    <label>搜索手法</label>
+                    <input type="text" id="tech-search" placeholder="输入手法名或关键词筛选…" oninput="filterStyles()" autocomplete="off">
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>选择风格</label>
-                        <select name="writing_style" id="style-select" onchange="onStyleChange()" size="6" style="height:auto;">
-                            <option value="">默认风格（不模仿特定作家）</option>
+                        <label>选择手法</label>
+                        <select name="narrative_technique" id="tech-select" onchange="onStyleChange()" size="7" style="height:auto;">
+                            <option value="">不指定（使用默认叙事）</option>
                         </select>
                     </div>
-                    <div class="form-group" id="style-preview" style="display:none;">
-                        <label>风格预览</label>
-                        <div id="style-desc" style="font-size:0.85rem;color:var(--text-secondary);padding:0.5rem;background:var(--bg-primary);border-radius:var(--radius-sm);min-height:2.5rem;"></div>
+                    <div class="form-group" id="tech-preview" style="display:none;">
+                        <label>手法预览</label>
+                        <div id="tech-desc" style="font-size:0.85rem;color:var(--text-secondary);padding:0.5rem;background:var(--bg-primary);border-radius:var(--radius-sm);min-height:2.5rem;"></div>
                     </div>
                 </div>
                 <details style="margin-top:0.5rem;">
-                    <summary style="cursor:pointer;color:var(--text-secondary);font-size:0.85rem;">+ 添加自定义风格</summary>
+                    <summary style="cursor:pointer;color:var(--text-secondary);font-size:0.85rem;">+ 添加我自己的手法</summary>
                     <div style="margin-top:0.75rem;padding:0.75rem;background:var(--bg-primary);border-radius:var(--radius-sm);">
                         <div class="form-row">
                             <div class="form-group">
-                                <label>作家名</label>
-                                <input type="text" id="custom-name" placeholder="如：我自己的风格">
+                                <label>手法名</label>
+                                <input type="text" id="custom-name" placeholder="如：我自己的文风">
                             </div>
                             <div class="form-group">
-                                <label>地区</label>
-                                <input type="text" id="custom-region" value="自定义" placeholder="中国/日本/…">
+                                <label>类别</label>
+                                <input type="text" id="custom-category" value="自定义" placeholder="网文/文艺/…">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>风格描述</label>
-                            <textarea id="custom-style" rows="2" placeholder="描述此风格的写作特点…"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>代表作（逗号分隔）</label>
-                            <input type="text" id="custom-works" placeholder="《作品A》, 《作品B》">
+                            <label>手法描述</label>
+                            <textarea id="custom-summary" rows="3" placeholder="用你自己的话描述这套手法的可执行特征：人称、句长、对话率、节奏、忌讳…"></textarea>
                         </div>
                         <button type="button" class="btn btn-outline" onclick="addCustomStyle()" style="font-size:0.8rem;">➕ 添加到列表</button>
                         <span id="custom-msg" style="font-size:0.75rem;color:var(--green);margin-left:0.5rem;display:none;"></span>
+                        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.5rem;">
+                            只描述你自己的风格。请勿填写他人姓名或作品名。
+                        </p>
                     </div>
                 </details>
             </div>
@@ -207,11 +206,12 @@
 
             <!-- ── Submit ── -->
             <div id="form-error" class="alert alert-error" style="display:none;"></div>
+            <div id="estimate-box" class="alert" style="display:none;margin-top:0.5rem;font-size:0.85rem;line-height:1.6;"></div>
             <button type="submit" class="btn btn-primary btn-lg" style="width:100%;text-align:center;justify-content:center;margin-top:0.5rem;" id="submit-btn">
                 🚀 开始生成小说
             </button>
             <p style="text-align:center;color:var(--text-muted);margin-top:0.75rem;font-size:0.8rem;">
-                注意：生成过程将消耗 API token，请确保 API Key 有效且有足够额度
+                运行前请先查看上方的消耗预估。生成过程将消耗 API token，请确保 API Key 有效且有足够额度
             </p>
         </form>
 
@@ -250,67 +250,45 @@
 
     onProviderChange();
 
-    // ── Writing style dropdown ──────────────────────────────────────
-    let allStyles = [];
-    let customStyles = [];
+    // ── Narrative technique dropdown ────────────────────────────────
+    let allTechniques = [];
 
     async function loadStyles() {
         try {
-            const resp = await fetch('/api/styles');
+            const resp = await fetch('/api/techniques');
             const data = await resp.json();
-            allStyles = data.writers;
-            customStyles = data.custom || [];
+            allTechniques = data.techniques || [];
             renderStyleOptions('');
         } catch (e) {
-            console.error('Failed to load styles:', e);
+            console.error('Failed to load techniques:', e);
         }
     }
 
     function renderStyleOptions(filter) {
-        const select = document.getElementById('style-select');
-        select.innerHTML = '<option value="">默认风格（不模仿特定作家）</option>';
+        const select = document.getElementById('tech-select');
+        select.innerHTML = '<option value="">不指定（使用默认叙事）</option>';
 
-        const filterLower = filter.toLowerCase();
-        const combined = [...customStyles, ...allStyles];  // custom first
-        const filtered = filter
-            ? combined.filter(w =>
-                w.name.toLowerCase().includes(filterLower) ||
-                w.region.toLowerCase().includes(filterLower) ||
-                w.style.toLowerCase().includes(filterLower) ||
-                (w.works || []).some(wk => wk.toLowerCase().includes(filterLower))
-              )
-            : combined;
+        const filterLower = (filter || '').toLowerCase();
+        const filtered = filterLower
+            ? allTechniques.filter(t =>
+                (t.name || '').toLowerCase().includes(filterLower) ||
+                (t.category || '').toLowerCase().includes(filterLower) ||
+                (t.summary || '').toLowerCase().includes(filterLower))
+            : allTechniques;
 
-        // Sort: public domain first, then by region
-        const pdWriters = filtered.filter(w => w.is_public_domain);
-        const otherWriters = filtered.filter(w => !w.is_public_domain);
-
-        if (pdWriters.length > 0) {
-            const pdGroup = document.createElement('optgroup');
-            pdGroup.label = '公版安全 (' + pdWriters.length + '人)';
-            pdGroup.style.color = '#3fb950';
-            for (const w of pdWriters) {
-                const opt = document.createElement('option');
-                opt.value = w.name;
-                opt.textContent = w.name + ' — ' + (w.works[0] || '');
-                pdGroup.appendChild(opt);
-            }
-            select.appendChild(pdGroup);
+        const groups = {};
+        for (const t of filtered) {
+            const key = t.category || '其他';
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(t);
         }
-
-        const regions = {};
-        for (const w of otherWriters) {
-            const r = w.region + (customStyles.includes(w) ? ' [自定]' : '');
-            if (!regions[r]) regions[r] = [];
-            regions[r].push(w);
-        }
-        for (const [region, writers] of Object.entries(regions).sort()) {
+        for (const [cat, items] of Object.entries(groups).sort()) {
             const group = document.createElement('optgroup');
-            group.label = region + ' (' + writers.length + '人)';
-            for (const w of writers) {
+            group.label = cat + ' (' + items.length + ')';
+            for (const t of items) {
                 const opt = document.createElement('option');
-                opt.value = w.name;
-                opt.textContent = w.name + ' — ' + (w.works[0] || '');
+                opt.value = t.id;
+                opt.textContent = t.name + (t.is_user_defined ? '（我的）' : '');
                 group.appendChild(opt);
             }
             select.appendChild(group);
@@ -325,61 +303,79 @@
     }
 
     function filterStyles() {
-        const q = document.getElementById('style-search').value;
+        const q = document.getElementById('tech-search').value;
         renderStyleOptions(q);
     }
 
     function onStyleChange() {
-        const name = document.getElementById('style-select').value;
-        if (!name) { document.getElementById('style-preview').style.display = 'none'; return; }
-        const writer = [...customStyles, ...allStyles].find(w => w.name === name);
-        const preview = document.getElementById('style-preview');
-        const desc = document.getElementById('style-desc');
-        if (writer) {
-            preview.style.display = 'block';
-            const legalNote = writer.is_public_domain
-                ? '<div style=\"color:#3fb950;font-size:0.8rem;margin-bottom:0.5rem;\">该作家已故超过50年，作品进入公有领域，可安全使用。</div>'
-                : '<div style=\"color:#d2991d;font-size:0.8rem;margin-bottom:0.5rem;\">该作家可能仍在世或去世不足50年。模仿其风格可能存在法律风险。本工具不保证生成内容与特定作家风格一致，用户对使用生成内容承担全部责任。详见 <a href=\"/terms\" target=\"_blank\">使用条款</a>。</div>';
-            desc.innerHTML = legalNote +
-                '<strong>' + writer.name + '</strong> (' + writer.region + ')' +
-                (writer.death_year ? ' 卒于 ' + writer.death_year : '') + '<br>' +
-                writer.style + '<br><em>代表作: ' + (writer.works || []).join(', ') + '</em>';
+        const id = document.getElementById('tech-select').value;
+        const preview = document.getElementById('tech-preview');
+        const desc = document.getElementById('tech-desc');
+        if (!id) { preview.style.display = 'none'; return; }
+
+        const t = allTechniques.find(x => x.id === id);
+        if (!t) { preview.style.display = 'none'; return; }
+
+        preview.style.display = 'block';
+        desc.textContent = '';
+
+        const head = document.createElement('strong');
+        head.textContent = t.name + '（' + (t.category || '') + '）';
+        desc.appendChild(head);
+        desc.appendChild(document.createElement('br'));
+
+        const summary = document.createElement('span');
+        summary.textContent = t.summary || '';
+        desc.appendChild(summary);
+
+        const spec = t.spec || {};
+        if (spec.narrative_person) {
+            desc.appendChild(document.createElement('br'));
+            const s = document.createElement('span');
+            s.textContent = '人称 ' + spec.narrative_person +
+                '｜对话 ' + Math.round((spec.dialogue_ratio || 0) * 100) + '%' +
+                '｜句长中位 ' + (spec.sentence_length_p50 || '-') + ' 字';
+            desc.appendChild(s);
+        }
+        if (spec.forbidden && spec.forbidden.length) {
+            desc.appendChild(document.createElement('br'));
+            const s = document.createElement('span');
+            s.textContent = '禁用：' + spec.forbidden.join('、');
+            desc.appendChild(s);
         }
     }
 
     async function addCustomStyle() {
         const name = document.getElementById('custom-name').value.trim();
-        const region = document.getElementById('custom-region').value.trim() || '自定义';
-        const style = document.getElementById('custom-style').value.trim();
-        const works = document.getElementById('custom-works').value.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+        const category = document.getElementById('custom-category').value.trim() || '自定义';
+        const summary = document.getElementById('custom-summary').value.trim();
 
-        if (!name || !style) {
-            document.getElementById('custom-msg').textContent = '请至少填写作家名和风格描述';
+        if (!name || !summary) {
+            document.getElementById('custom-msg').textContent = '请填写手法名与手法描述';
             document.getElementById('custom-msg').style.display = 'inline';
             return;
         }
 
         try {
-            const resp = await fetch('/api/styles/custom', {
+            const resp = await fetch('/api/techniques/custom', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({name, region, style, works})
+                body: JSON.stringify({name, category, summary})
             });
             if (resp.ok) {
                 const data = await resp.json();
-                customStyles = data.custom || [];
-                renderStyleOptions(document.getElementById('style-search').value);
-                document.getElementById('style-select').value = name;
+                await loadStyles();
+                const created = (data.custom || []).slice(-1)[0];
+                document.getElementById('tech-select').value = created ? created.id : '';
                 onStyleChange();
                 document.getElementById('custom-name').value = '';
-                document.getElementById('custom-style').value = '';
-                document.getElementById('custom-works').value = '';
+                document.getElementById('custom-summary').value = '';
                 document.getElementById('custom-msg').textContent = '已添加！';
                 document.getElementById('custom-msg').style.display = 'inline';
                 setTimeout(() => { document.getElementById('custom-msg').style.display = 'none'; }, 3000);
             }
         } catch (e) {
-            console.error('Failed to add custom style:', e);
+            console.error('Failed to add custom technique:', e);
         }
     }
 
@@ -460,6 +456,60 @@
     const form = document.getElementById('config-form');
     const errorEl = document.getElementById('form-error');
     const submitBtn = document.getElementById('submit-btn');
+    const estimateBox = document.getElementById('estimate-box');
+
+    // ── Run cost / duration estimate ────────────────────────────────
+    let estimateTimer = null;
+
+    async function refreshEstimate() {
+        const fd = new FormData(form);
+        const payload = {
+            target_word_count: parseInt(fd.get('target_word_count') || '8000', 10),
+            num_versions: parseInt(fd.get('num_versions') || '1', 10),
+            max_chapters: parseInt(fd.get('max_chapters') || '30', 10),
+            max_tokens_per_call: parseInt(fd.get('max_tokens_per_call') || '4000', 10),
+            npc_mode: fd.get('npc_mode') || 'parallel',
+            quality_mode: fd.get('quality_mode') || 'balanced',
+            model: fd.get('model') || '',
+            front_matter: (fd.get('front_matter_csv') || '').split(',').filter(Boolean),
+            story_end: fd.get('story_end') || '',
+        };
+        try {
+            const resp = await fetch('/api/estimate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload),
+            });
+            if (!resp.ok) return;
+            const est = await resp.json();
+            estimateBox.textContent = '';
+            const head = document.createElement('div');
+            head.textContent =
+                '预计消耗：' + est.chapters + ' 章 · ' + est.llm_calls + ' 次模型调用 · ' +
+                est.tokens_total.toLocaleString() + ' token · 约 ' + est.wall_minutes + ' 分钟 · ' +
+                '约 $' + est.cost_usd + '（≈¥' + est.cost_cny + '）';
+            estimateBox.appendChild(head);
+            for (const note of (est.notes || [])) {
+                const p = document.createElement('div');
+                p.style.color = 'var(--text-muted)';
+                p.style.fontSize = '0.78rem';
+                p.textContent = '· ' + note;
+                estimateBox.appendChild(p);
+            }
+            estimateBox.style.display = 'block';
+        } catch (e) {
+            /* estimate is best-effort; never block the run */
+        }
+    }
+
+    function scheduleEstimate() {
+        clearTimeout(estimateTimer);
+        estimateTimer = setTimeout(refreshEstimate, 300);
+    }
+
+    form.addEventListener('input', scheduleEstimate);
+    form.addEventListener('change', scheduleEstimate);
+    refreshEstimate();
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();

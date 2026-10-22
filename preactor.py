@@ -48,6 +48,8 @@ async def run_version(
 
     # Initialize agents for this version
     client = LLMClient(config)
+    # Charge every LLM call against the budget using the real API usage
+    client.budget = token_budget
     director = DirectorAgent(client, config)
     protagonist = ProtagonistAgent(client, config)
     npc_agent = NPCAgent(client, config)
@@ -359,7 +361,9 @@ async def run_version(
                 word_target=word_target,
                 rag_context=rag_context,
             )
-            state.total_tokens_used += write_tokens
+            # Authoritative: the client accumulates the real API usage of every
+            # call (director, protagonist, NPCs, writer, memory extraction).
+            state.total_tokens_used = client.total_tokens_used
 
             # --- Step 6: Record the chapter ---
             chapter = Chapter(
@@ -447,9 +451,11 @@ async def run_version(
                 else:
                     state.pacing_stage = "setup"
 
-            # Update token budget
-            est_chapter_tokens = write_tokens + 500  # rough estimate for other agent calls
-            if not await token_budget.consume(est_chapter_tokens):
+            # Update token accounting.
+            # The budget is charged inside LLMClient.call() from the real API
+            # usage, so here we only mirror the authoritative counters.
+            state.total_tokens_used = client.total_tokens_used
+            if token_budget.exceeded:
                 state.terminated_early = True
                 state.termination_reason = "总 token 预算已耗尽"
                 logger.warning(f"[版本 {version_id}] Token 预算已耗尽")

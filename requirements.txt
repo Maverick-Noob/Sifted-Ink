@@ -1,3 +1,9 @@
+# 选墨集 / Sifted-Ink — 运行依赖
+#
+# 推荐用 pyproject.toml 的 extras 分组安装：
+#     pip install -e ".[all-providers,export,dev]"
+# 本文件保留是为了兼容 `pip install -r requirements.txt` 的用法。
+
 # Core
 pyyaml>=6.0
 json5>=0.9
@@ -6,7 +12,7 @@ uvicorn>=0.29
 jinja2>=3.1
 python-multipart>=0.0.9
 
-# Multi-format export
+# Multi-format export (EPUB / PDF)
 ebooklib>=0.18
 fpdf2>=2.7
 
@@ -15,3 +21,7 @@ anthropic>=0.30
 openai>=1.30
 httpx<0.28
 google-generativeai>=0.6
+
+# Dev / test
+pytest>=8.0
+pytest-asyncio>=0.23

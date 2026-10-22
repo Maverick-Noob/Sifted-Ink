@@ -14,6 +14,7 @@ import re
 import uuid
 import time
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Optional
 
 from fastapi import FastAPI, Request, Form, HTTPException
@@ -29,9 +30,18 @@ from ..preactor import run_pre_actor
 from ..evaluator import evaluate_versions
 from ..writer import generate_novel, generate_novel_for_version, generate_eval_log, generate_front_matter
 from ..exporter import export_novel, FORMATS
+from ..estimation import estimate_run as estimate_generation_run
 from ..agents import LLMClient
 from ..naming import NamingEngine
-from ..utils import logger as app_logger, load_writing_styles, get_regions, get_writers_by_region
+from ..utils import (
+    logger as app_logger,
+    load_narrative_techniques,
+    load_user_techniques,
+    save_user_techniques,
+    slugify_technique,
+    get_technique_categories,
+    get_techniques_by_category,
+)
 
 
 # ── Log streaming: capture console logs per run ───────────────────────
@@ -271,7 +281,7 @@ async def _run_generation(run_id: str, config: StoryConfig, output_dir: str):
             "num_versions": config.num_versions,
             "max_npcs": config.max_npcs,
             "max_chapters": config.max_chapters,
-            "writing_style": config.writing_style or "默认",
+            "narrative_technique": config.narrative_technique or "默认",
             "naming_style": config.naming_style or "自动",
             "npc_name_style": config.npc_name_style,
             "front_matter": config.front_matter,
@@ -365,78 +375,72 @@ async def _run_generation(run_id: str, config: StoryConfig, output_dir: str):
 
 # ── Routes ─────────────────────────────────────────────────────────────
 
-@app.get("/api/styles")
-async def get_styles(region: str = ""):
-    """Get writing styles, optionally filtered by region."""
-    regions = get_regions()
-    if region:
-        writers = get_writers_by_region(region)
-    else:
-        writers = load_writing_styles()
-
-    # Load custom styles
-    custom = _load_custom_styles()
+@app.get("/api/techniques")
+async def get_techniques(category: str = ""):
+    """Get narrative techniques, optionally filtered by category."""
+    techniques = get_techniques_by_category(category) if category else (
+        load_narrative_techniques() + load_user_techniques()
+    )
 
     return {
-        "regions": regions,
-        "writers": [
+        "categories": get_technique_categories(),
+        "techniques": [
             {
-                "name": w["name"],
-                "region": w["region"],
-                "style": w["style"],
-                "works": w.get("representative_works", []),
-                "death_year": w.get("death_year"),
-                "is_public_domain": w.get("is_public_domain", False),
+                "id": t["id"],
+                "name": t.get("name", ""),
+                "category": t.get("category", "其他"),
+                "summary": t.get("summary", ""),
+                "spec": t.get("spec", {}),
+                "sample_paragraph": t.get("sample_paragraph", ""),
+                "is_user_defined": str(t.get("id", "")).startswith("user:"),
             }
-            for w in writers
+            for t in techniques
         ],
-        "custom": custom,
     }
 
 
-@app.post("/api/styles/custom")
-async def add_custom_style(request: Request):
-    """Add a custom writing style."""
+@app.post("/api/techniques/custom")
+async def add_custom_technique(request: Request):
+    """Add a user-defined technique (a description of the author's own style)."""
     try:
         data = await request.json()
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid JSON")
 
     name = data.get("name", "").strip()
-    style_desc = data.get("style", "").strip()
-    if not name or not style_desc:
-        raise HTTPException(status_code=400, detail="Name and style are required")
+    summary = data.get("summary", "").strip()
+    if not name or not summary:
+        raise HTTPException(status_code=400, detail="Name and summary are required")
 
-    custom = _load_custom_styles()
-    new_style = {
+    custom = load_user_techniques()
+    slug = slugify_technique(name)
+    new_technique = {
+        "id": f"user:{slug}",
         "name": name,
-        "region": data.get("region", "自定义").strip() or "自定义",
-        "style": style_desc,
-        "representative_works": data.get("works", []),
+        "category": data.get("category", "自定义").strip() or "自定义",
+        "summary": summary,
     }
-    custom.append(new_style)
-    _save_custom_styles(custom)
+    # Replace an existing entry with the same id
+    custom = [c for c in custom if c.get("id") != new_technique["id"]]
+    custom.append(new_technique)
+    save_user_techniques(custom)
 
     return {"status": "ok", "custom": custom}
 
 
 def _custom_styles_path() -> Path:
-    return Path(__file__).resolve().parent.parent / "user_styles.json"
+    """Path of the user-defined technique store."""
+    return Path(__file__).resolve().parent.parent / "user_techniques.json"
 
 
 def _load_custom_styles() -> list:
-    path = _custom_styles_path()
-    if path.exists():
-        try:
-            return json.loads(path.read_text(encoding="utf-8"))
-        except Exception:
-            return []
-    return []
+    """User-defined techniques (kept for backward-compatible naming)."""
+    return load_user_techniques()
 
 
 def _save_custom_styles(styles: list):
-    path = _custom_styles_path()
-    path.write_text(json.dumps(styles, ensure_ascii=False, indent=2), encoding="utf-8")
+    """Persist user-defined techniques (kept for backward-compatible naming)."""
+    save_user_techniques(styles)
 
 
 @app.get("/terms", response_class=HTMLResponse)
@@ -496,7 +500,7 @@ async def start_generation(
     api_key: str = Form(""),
     model: str = Form("claude-sonnet-4-6"),
     api_provider: str = Form("anthropic"),
-    writing_style: str = Form(""),
+    narrative_technique: str = Form(""),
 ):
     """Start a generation run. Returns JSON with run_id."""
     # Parse front_matter from hidden CSV field (more reliable than getlist)
@@ -592,7 +596,7 @@ async def start_generation(
         world_setting=world_setting,
         story_start=story_start,
         story_end=story_end,
-        writing_style=writing_style.strip(),
+        narrative_technique=narrative_technique.strip(),
         npc_name_style=npc_name_style,
         protagonist_mode=protagonist_mode,
         protagonist_count=resolved_protagonist_count,
@@ -908,6 +912,28 @@ async def download_eval(run_id: str):
     )
 
 
+@app.post("/api/estimate")
+async def estimate_run(request: Request):
+    """Estimate token usage, wall-clock time and cost before starting a run."""
+    try:
+        data = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON")
+
+    cfg = SimpleNamespace(
+        target_word_count=int(data.get("target_word_count", 8000)),
+        max_chapters=int(data.get("max_chapters", 30)),
+        num_versions=int(data.get("num_versions", 1)),
+        max_tokens_per_call=int(data.get("max_tokens_per_call", 4000)),
+        npc_mode=data.get("npc_mode", "parallel"),
+        quality_mode=data.get("quality_mode", "balanced"),
+        model=data.get("model", ""),
+        story_end=data.get("story_end", ""),
+        front_matter=list(data.get("front_matter", []) or []),
+    )
+    return estimate_generation_run(cfg)
+
+
 # ── Startup ────────────────────────────────────────────────────────────
 
 def main():
@@ -917,7 +943,10 @@ def main():
     _sys.stdout.write("  🌐 http://localhost:8000\n\n")
     _sys.stdout.flush()
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+    # Bind to loopback by default: the UI has no authentication and the form
+    # collects an API key, so it must not be reachable from the local network.
+    # Use --host 0.0.0.0 explicitly if you need LAN access.
+    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
 
 
 if __name__ == "__main__":
