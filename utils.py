@@ -14,7 +14,7 @@ from typing import Optional
 # Logging
 # ---------------------------------------------------------------------------
 
-def setup_logger(name: str = "narrative_prism", level: int = logging.INFO) -> logging.Logger:
+def setup_logger(name: str = "sifted_ink", level: int = logging.INFO) -> logging.Logger:
     """Create a logger with console + file handlers."""
     logger = logging.getLogger(name)
     logger.setLevel(level)

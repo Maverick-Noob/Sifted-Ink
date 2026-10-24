@@ -27,6 +27,12 @@ output/
 # for copyright reasons. See docs/research/README.md.
 docs/research/author_corpus.json
 
+# M0 验证产生的中间产物：盲评样本、盲评包、抓取的语料。
+# 语料是受版权保护的第三方作品，仅用于内部统计标定，绝不入库。
+m0_output/
+m0_blind/
+m0_corpus/
+
 # OS
 .DS_Store
 Thumbs.db

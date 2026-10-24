@@ -162,6 +162,68 @@ class Chapter:
 
 
 @dataclass
+class BranchOption:
+    """
+    One candidate direction at a decision point, with a forward projection.
+
+    The projection is the point: it answers "走这条路的下游会怎样" — what it
+    delivers, what it costs, where it collides with what is already set up,
+    the hook it leaves, and how likely it is to go wrong.
+    """
+    id: str
+    title: str = ""           # short label (3-8 chars)
+    description: str = ""     # what happens (50-80 chars)
+    payoff: str = ""          # what this direction delivers
+    cost: str = ""            # what it spends: foreshadowing, resources, relations
+    conflict: str = ""        # where it collides with existing setup
+    hook: str = ""            # the chapter-ending hook it leaves
+    risk: str = "mid"         # low / mid / high
+    risk_reason: str = ""
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "payoff": self.payoff,
+            "cost": self.cost,
+            "conflict": self.conflict,
+            "hook": self.hook,
+            "risk": self.risk,
+            "risk_reason": self.risk_reason,
+        }
+
+    def summary_line(self) -> str:
+        """One-line human-readable form."""
+        label = self.title or self.description[:12] or self.id
+        bits = [f"[{label}]"]
+        if self.payoff:
+            bits.append(f"得:{self.payoff[:20]}")
+        if self.cost:
+            bits.append(f"失:{self.cost[:20]}")
+        if self.risk:
+            bits.append(f"险:{self.risk}")
+        return " ".join(bits)
+
+
+@dataclass
+class BranchDecision:
+    """The decision point of one chapter: the options offered and the one taken."""
+    chapter: int
+    options: list[BranchOption] = field(default_factory=list)
+    chosen_id: str = ""
+    chosen: Optional[BranchOption] = None
+
+    def to_dict(self) -> dict:
+        return {
+            "chapter": self.chapter,
+            "chosen_id": self.chosen_id,
+            "chosen": self.chosen.to_dict() if self.chosen else None,
+            "options": [o.to_dict() for o in self.options],
+        }
+
+
+@dataclass
 class StoryState:
     """Runtime state for a single pre-rehearsal version."""
     version_id: int
@@ -169,6 +231,7 @@ class StoryState:
     chapters: list[Chapter] = field(default_factory=list)
     active_npcs: list[NPC] = field(default_factory=list)
     npc_graveyard: list[NPC] = field(default_factory=list)  # exited/dead NPCs
+    branch_history: list[BranchDecision] = field(default_factory=list)
     protagonist_state: dict = field(default_factory=lambda: {
         "emotional": "neutral",
         "physical": "healthy",

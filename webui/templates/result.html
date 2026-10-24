@@ -146,15 +146,71 @@
             </table>
         </div>
 
-        <!-- Tabs for novel preview & eval -->
+        <!-- Tabs for novel preview, branch tree & eval -->
         <div class="tabs">
             <div class="tab active" onclick="switchTab('novel')">📖 小说预览</div>
+            <div class="tab" onclick="switchTab('branch')">🌿 走向树</div>
             <div class="tab" onclick="switchTab('eval')">📋 评估数据</div>
         </div>
 
         <!-- Novel content -->
         <div id="tab-novel" class="novel-preview">
             {{ novel_text | safe }}
+        </div>
+
+        <!-- Branch tree -->
+        <div id="tab-branch" style="display:none;">
+            {% set bv = result.versions | selectattr('version_id', 'equalto', result.winning_version_id) | list %}
+            {% set branch_state = bv[0] if bv else None %}
+            {% if branch_state and branch_state.branch_history %}
+                <div class="card">
+                    <div class="card-header">
+                        <span class="icon">🌿</span>
+                        <h3>走向树 · 版本 #{{ result.winning_version_id }}</h3>
+                    </div>
+                    <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1rem;">
+                        每个决策点给出若干条互斥走向及其<b>下游后果推演</b>，最终选中的那条会作为
+                        下一章的硬约束——下一章的走向必须从它分叉，而不是重开一条平行线。
+                    </p>
+                    {% for dec in branch_state.branch_history %}
+                    <div style="border-left:3px solid var(--purple);padding-left:1rem;margin-bottom:1.5rem;">
+                        <div style="font-weight:700;margin-bottom:0.5rem;">
+                            第 {{ dec.chapter }} 章 · 决策点
+                        </div>
+                        {% for opt in dec.options %}
+                        {% set is_chosen = opt.id == dec.chosen_id %}
+                        <div style="background:{{ 'var(--bg-primary)' if not is_chosen else 'rgba(163,113,247,0.14)' }};
+                                    border:1px solid {{ 'var(--purple)' if is_chosen else 'var(--border-color)' }};
+                                    border-radius:var(--radius-sm);padding:0.6rem 0.8rem;margin-bottom:0.5rem;">
+                            <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+                                <strong>{{ opt.title or opt.id }}</strong>
+                                {% if is_chosen %}
+                                <span style="color:var(--purple);font-size:0.75rem;">✓ 已选</span>
+                                {% endif %}
+                                {% if opt.risk %}
+                                <span style="font-size:0.72rem;color:{{ '#d2991d' if opt.risk == 'high' else ('#3fb950' if opt.risk == 'low' else 'var(--text-muted)') }};">
+                                    风险 {{ opt.risk }}
+                                </span>
+                                {% endif %}
+                            </div>
+                            {% if opt.description %}<div style="font-size:0.85rem;margin-top:0.3rem;">{{ opt.description }}</div>{% endif %}
+                            {% if opt.payoff %}<div style="font-size:0.8rem;color:var(--green);margin-top:0.25rem;">得：{{ opt.payoff }}</div>{% endif %}
+                            {% if opt.cost %}<div style="font-size:0.8rem;color:var(--gold);margin-top:0.15rem;">失：{{ opt.cost }}</div>{% endif %}
+                            {% if opt.conflict and opt.conflict != '无' %}<div style="font-size:0.8rem;color:#d2991d;margin-top:0.15rem;">冲：{{ opt.conflict }}</div>{% endif %}
+                            {% if opt.hook %}<div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.15rem;">钩：{{ opt.hook }}</div>{% endif %}
+                            {% if opt.risk_reason %}<div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.15rem;">险因：{{ opt.risk_reason }}</div>{% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="card">
+                    <p style="color:var(--text-muted);font-size:0.9rem;">
+                        本次运行没有记录到走向决策点（导演未产出 branch_options，或版本未完成任何章节）。
+                    </p>
+                </div>
+            {% endif %}
         </div>
 
         <!-- Eval JSON -->

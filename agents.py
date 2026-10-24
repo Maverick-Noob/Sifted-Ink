@@ -17,7 +17,10 @@ import json
 import re
 from typing import Optional
 
-from .models import StoryConfig, StoryState, AgentAction, NPC, Chapter, EvalResult
+from .models import (
+    StoryConfig, StoryState, AgentAction, NPC, Chapter, EvalResult,
+    BranchOption, BranchDecision,
+)
 from .prompts import (
     DIRECTOR_SYSTEM_PROMPT,
     DIRECTOR_OUTLINE_PROMPT,
@@ -766,13 +769,30 @@ class DirectorAgent:
                 status = "✅" if m.reached else "⬜"
                 outline_text += f"- {status} 第{m.target_chapter}章: {m.description}\n"
 
+        # ── 已选走向（让新的走向从上一条分叉，而不是重开平行线）──────────
+        branch_text = ""
+        if state.branch_history:
+            branch_text = "## 已选走向（本章的走向必须从这些往下分叉）\n"
+            for dec in state.branch_history[-3:]:
+                if dec.chosen is None:
+                    continue
+                c = dec.chosen
+                line = f"- 第{dec.chapter}章 → {c.title or c.id}：{c.description}"
+                if c.payoff:
+                    line += f"（已兑现：{c.payoff}）"
+                if c.cost:
+                    line += f"（已付出：{c.cost}）"
+                if c.conflict:
+                    line += f"（遗留冲突：{c.conflict}）"
+                branch_text += line + "\n"
+
         return f"""## 故事全局信息
 - 主角: {self.config.protagonist_name} ({self.config.protagonist_traits})
 - 世界背景: {self.config.world_setting}
 - 故事开头: {self.config.story_start}
 - 目标结局: {self.config.story_end}
 
-{outline_text}
+{outline_text}{branch_text}
 ## 当前进度
 - 当前主角状态: {json.dumps(state.protagonist_state, ensure_ascii=False)}
 - 当前活动 NPC: {npc_list}
@@ -809,7 +829,90 @@ class DirectorAgent:
                 "milestone_reached": "",
             }
 
+        # ── 走向：解析 → 选定 → 记入状态 ──────────────────────────────
+        decision = self._record_branch(state, result)
+        if decision is not None:
+            result["branch_options"] = [o.to_dict() for o in decision.options]
+            result["branch_choice"] = decision.chosen_id
+            # 让已选走向进入本章摘要，写手与主角才看得到
+            if decision.chosen is not None:
+                chosen = decision.chosen
+                extra = f"【本章走向】{chosen.title or chosen.id}：{chosen.description}"
+                if chosen.hook:
+                    extra += f"（章末钩子：{chosen.hook}）"
+                result["chapter_summary"] = f"{result.get('chapter_summary', '')}\n{extra}"
+
         return result
+
+    # ── 走向处理 ──────────────────────────────────────────────────────
+
+    @staticmethod
+    def _parse_branch_options(raw: object) -> list[BranchOption]:
+        """
+        Parse the director's branch_options into BranchOption objects.
+
+        Tolerates the older flat format ({"id", "description"}) and ignores
+        anything that is not a mapping with a usable id.
+        """
+        options: list[BranchOption] = []
+        if not isinstance(raw, list):
+            return options
+        for item in raw:
+            if not isinstance(item, dict):
+                continue
+            bid = str(item.get("id", "")).strip()
+            if not bid:
+                continue
+            risk = str(item.get("risk", "mid")).strip().lower()
+            if risk not in ("low", "mid", "high"):
+                risk = "mid"
+            options.append(BranchOption(
+                id=bid,
+                title=str(item.get("title", "") or "").strip(),
+                description=str(item.get("description", "") or "").strip(),
+                payoff=str(item.get("payoff", "") or "").strip(),
+                cost=str(item.get("cost", "") or "").strip(),
+                conflict=str(item.get("conflict", "") or "").strip(),
+                hook=str(item.get("hook", "") or "").strip(),
+                risk=risk,
+                risk_reason=str(item.get("risk_reason", "") or "").strip(),
+            ))
+        return options
+
+    def _record_branch(
+        self, state: StoryState, result: dict
+    ) -> Optional[BranchDecision]:
+        """
+        Parse the options, pick one, and append the decision to the state.
+
+        Returns the decision, or None when the director produced no options.
+        """
+        options = self._parse_branch_options(result.get("branch_options"))
+        if not options:
+            return None
+
+        chosen_id = str(result.get("branch_choice", "") or "").strip()
+        chosen = next((o for o in options if o.id == chosen_id), None)
+        if chosen is None:
+            # The director named an id that is not on the list — fall back to the
+            # first option rather than losing the decision point.
+            chosen = options[0]
+            logger.warning(
+                f"导演给出的 branch_choice={chosen_id!r} 不在选项列表中，回退到 {chosen.id!r}"
+            )
+
+        decision = BranchDecision(
+            chapter=state.chapter_count + 1,
+            options=options,
+            chosen_id=chosen.id,
+            chosen=chosen,
+        )
+        state.branch_history.append(decision)
+        logger.info(
+            f"[走向] 第{decision.chapter}章 选定 {chosen.summary_line()}"
+            + (f"（另有 {len(options) - 1} 条备选走向）" if len(options) > 1 else "")
+        )
+        return decision
 
 
 # =========================================================================

@@ -304,6 +304,10 @@ def generate_eval_log(result: PreActorResult, story_meta: dict | None = None) ->
                 "notes": eval_data.evaluator_notes,
             }
 
+        # 走向树：每个决策点的备选走向与最终选定
+        if getattr(v, "branch_history", None):
+            version_log["branch_tree"] = [d.to_dict() for d in v.branch_history]
+
         log["versions"].append(version_log)
 
     return log

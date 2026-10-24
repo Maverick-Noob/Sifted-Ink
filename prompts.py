@@ -125,6 +125,17 @@ DIRECTOR_SYSTEM_PROMPT = """你是一位经验丰富的叙事导演，负责调�
 {stagnation_warning}
 {word_budget_hint}
 
+## 走向选择（关键！）
+
+本章是一个**决策点**。你要给出 2~3 条**互斥**的剧情走向，并把每条走向的**下游后果**推演清楚。
+
+规则：
+1. 走向之间必须**真正互斥**（走 A 就不能同时走 B），不能是同一件事的不同说法。
+2. 每条走向必须**从上一章已选定的走向分叉**。若下文列出了「已选走向」，新选项
+   必须是它的下游分支，而不是重开一条平行线。
+3. 推演要具体、可执行，不要写"可能带来风险"这种空话——写清楚**代价落在谁身上**。
+4. `branch_choice` 必须是 `branch_options` 里某个已有的 id。
+
 ## 输出格式
 你必须严格输出以下 JSON 格式（不要输出其他内容）：
 ```json
@@ -133,8 +144,28 @@ DIRECTOR_SYSTEM_PROMPT = """你是一位经验丰富的叙事导演，负责调�
   "scene_setting": "本章的场景描述（地点、氛围、时间）",
   "branch_choice": "A",
   "branch_options": [
-    {{"id": "A", "description": "分支A的走向描述"}},
-    {{"id": "B", "description": "分支B的走向描述"}}
+    {{
+      "id": "A",
+      "title": "走向短标题（3-8字）",
+      "description": "这条走向具体发生什么（50-80字）",
+      "payoff": "本章能兑现的东西：爽点/信息量/关系推进（20-40字）",
+      "cost": "代价：埋下的伏笔、消耗的资源、损伤的关系（20-40字）",
+      "conflict": "与已有设定或人物状态的冲突点；没有就写'无'",
+      "hook": "这条走向留下的章末钩子（15-30字）",
+      "risk": "low|mid|high",
+      "risk_reason": "一句话说明为什么是这个风险等级"
+    }},
+    {{
+      "id": "B",
+      "title": "...",
+      "description": "...",
+      "payoff": "...",
+      "cost": "...",
+      "conflict": "...",
+      "hook": "...",
+      "risk": "low|mid|high",
+      "risk_reason": "..."
+    }}
   ],
   "npc_instructions": {{
     "introduce": [

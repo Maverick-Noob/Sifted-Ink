@@ -30,8 +30,15 @@ import sys
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parent.parent
-if str(_ROOT) not in sys.path:
-    sys.path.insert(0, str(_ROOT))
+# The repository root IS the package directory, so the PARENT has to be on
+# sys.path for `import novel_preactor.xxx` to resolve — otherwise the module
+# novel_preactor.py shadows the package directory of the same name.
+for _p in (str(_ROOT), str(_ROOT.parent)):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+if str(_ROOT.parent) in sys.path:
+    sys.path.remove(str(_ROOT.parent))
+    sys.path.insert(0, str(_ROOT.parent))
 
 from novel_preactor.diversity import analyze_text, diagnose  # noqa: E402
 

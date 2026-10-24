@@ -30,14 +30,22 @@ A 组刻意选用**已故 50 年以上的公版作家**（鲁迅，1936 年逝�
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
 import os
 import sys
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parent.parent
-if str(_ROOT) not in sys.path:
-    sys.path.insert(0, str(_ROOT))
+# The repository root IS the package directory, so the PARENT has to be on
+# sys.path for `import novel_preactor.xxx` to resolve — otherwise the module
+# novel_preactor.py shadows the package directory of the same name.
+for _p in (str(_ROOT), str(_ROOT.parent)):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+if str(_ROOT.parent) in sys.path:
+    sys.path.remove(str(_ROOT.parent))
+    sys.path.insert(0, str(_ROOT.parent))
 
 from novel_preactor.agents import LLMClient  # noqa: E402
 from novel_preactor.models import StoryConfig  # noqa: E402
@@ -107,6 +115,10 @@ def build_prompts(technique_id: str) -> dict[str, tuple[str, str]]:
 
 
 def main() -> int:
+    return asyncio.run(_main())
+
+
+async def _main() -> int:
     ap = argparse.ArgumentParser(description="M0 Q2 盲评样本生成")
     ap.add_argument("--model", default="claude-sonnet-4-6")
     ap.add_argument("--provider", default="anthropic")
@@ -151,7 +163,7 @@ def main() -> int:
         for ch in range(1, args.chapters + 1):
             user = CHAPTER_BRIEF.format(chapter_no=ch, word_target=WORD_TARGET)
             print(f"[{key}] 生成第 {ch}/{args.chapters} 章 …")
-            text, tokens = client.call(system, user, max_tokens=2500, temperature=0.8)
+            text, tokens = await client.call(system, user, max_tokens=2500, temperature=0.8)
             path = out_dir / f"chapter_{ch:02d}.txt"
             path.write_text(text, encoding="utf-8")
             blind_key.setdefault(key, {})[path.name] = {"tokens": tokens}
